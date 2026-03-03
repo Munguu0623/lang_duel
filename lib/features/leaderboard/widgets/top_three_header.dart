@@ -28,6 +28,7 @@ class TopThreeHeader extends StatelessWidget {
           avatarSize: 48,
           color: c.silver,
           colorSoft: c.silverSoft,
+          isFirst: false,
         ),
         const SizedBox(width: SpacingTokens.md),
         _PodiumItem(
@@ -36,6 +37,7 @@ class TopThreeHeader extends StatelessWidget {
           avatarSize: 60,
           color: c.gold,
           colorSoft: c.goldSoft,
+          isFirst: true,
         ),
         const SizedBox(width: SpacingTokens.md),
         _PodiumItem(
@@ -44,6 +46,7 @@ class TopThreeHeader extends StatelessWidget {
           avatarSize: 48,
           color: c.bronze,
           colorSoft: c.bronzeSoft,
+          isFirst: false,
         ),
       ],
     );
@@ -57,6 +60,7 @@ class _PodiumItem extends StatelessWidget {
     required this.avatarSize,
     required this.color,
     required this.colorSoft,
+    required this.isFirst,
   });
 
   final LeaderboardEntry entry;
@@ -64,6 +68,7 @@ class _PodiumItem extends StatelessWidget {
   final double avatarSize;
   final Color color;
   final Color colorSoft;
+  final bool isFirst;
 
   @override
   Widget build(BuildContext context) {
@@ -71,23 +76,25 @@ class _PodiumItem extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Rank badge
+        // Rank badge — 1st place gets trophy icon, alpha 0.20
         Container(
           width: 26,
           height: 26,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
+            color: color.withValues(alpha: 0.20),
             shape: BoxShape.circle,
           ),
           child: Center(
-            child: Text(
-              '${entry.rank}',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
+            child: isFirst
+                ? Icon(Icons.emoji_events_rounded, size: 14, color: color)
+                : Text(
+                    '${entry.rank}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),
@@ -102,19 +109,28 @@ class _PodiumItem extends StatelessWidget {
           style: TextStyles.caption.copyWith(color: c.textSecondary),
         ),
         const SizedBox(height: SpacingTokens.xs),
-        // Podium bar
+        // Podium bar — 1st place gets gradient fill
         Container(
           width: 80,
           height: podiumHeight,
           decoration: BoxDecoration(
-            color: colorSoft,
+            color: isFirst ? null : colorSoft,
+            gradient: isFirst
+                ? LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [color, color.withValues(alpha: 0.7)],
+                  )
+                : null,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(12),
             ),
-            border: Border.all(
-              color: color.withValues(alpha: 0.2),
-              width: 1,
-            ),
+            border: isFirst
+                ? null
+                : Border.all(
+                    color: color.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
           ),
           child: Center(
             child: Text(
@@ -122,7 +138,7 @@ class _PodiumItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: color,
+                color: isFirst ? Colors.white : color,
               ),
             ),
           ),

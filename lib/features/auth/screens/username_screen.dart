@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../features/auth/auth_flow_controller.dart';
+import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
-import '../../../ui/widgets/soft_card.dart';
 import '../../../ui/widgets/top_bar.dart';
 
 class UsernameScreen extends StatefulWidget {
@@ -48,6 +48,7 @@ class _UsernameScreenState extends State<UsernameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -61,11 +62,17 @@ class _UsernameScreenState extends State<UsernameScreen> {
               ),
               const SizedBox(height: SpacingTokens.xl),
               Text(
-                'This is how other players will see you.',
+                'This is your arena name.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: SpacingTokens.lg),
-              SoftCard(
+              // Borderless container with surfaceSecondary bg
+              Container(
+                padding: const EdgeInsets.all(SpacingTokens.base),
+                decoration: BoxDecoration(
+                  color: c.surfaceSecondary,
+                  borderRadius: RadiusTokens.card,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -91,9 +98,11 @@ class _UsernameScreenState extends State<UsernameScreen> {
               ValueListenableBuilder<bool>(
                 valueListenable: _isValid,
                 builder: (context, isValid, _) {
-                  return PrimaryButton(
-                    label: 'Continue',
-                    onPressed: isValid ? _continue : null,
+                  return CtaGlow(
+                    child: PrimaryButton(
+                      label: 'Continue',
+                      onPressed: isValid ? _continue : null,
+                    ),
                   );
                 },
               ),

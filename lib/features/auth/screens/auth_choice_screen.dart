@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../features/auth/auth_flow_controller.dart';
+import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
 
 /// Login screen — username + password with validation.
@@ -108,7 +109,7 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
                 children: [
                   const SizedBox(height: 56),
 
-                  // Logo
+                  // Logo with blue+purple glow
                   Center(
                     child: Container(
                       width: 64,
@@ -118,13 +119,18 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [c.primary, c.primaryDark],
+                          colors: [c.primary, c.accent],
                         ),
                         boxShadow: [
                           BoxShadow(
                             color: c.primary.withValues(alpha: 0.25),
                             blurRadius: 20,
-                            offset: const Offset(0, 6),
+                            offset: const Offset(0, 4),
+                          ),
+                          BoxShadow(
+                            color: c.accent.withValues(alpha: 0.15),
+                            blurRadius: 28,
+                            offset: const Offset(0, 8),
                           ),
                         ],
                       ),
@@ -140,14 +146,14 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
                   // Heading
                   Center(
                     child: Text(
-                      'Welcome back',
+                      'Ready to duel?',
                       style: Theme.of(context).textTheme.headlineLarge,
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.sm),
                   Center(
                     child: Text(
-                      'Sign in to continue your duels',
+                      'Sign in and dominate',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -237,12 +243,14 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
 
                   const SizedBox(height: SpacingTokens.xl),
 
-                  // Login button
-                  PrimaryButton(
-                    label: 'Sign in',
-                    size: ButtonSize.lg,
-                    onPressed: _isValid ? _login : null,
-                    isLoading: _isLoading,
+                  // Login button with CTA glow
+                  CtaGlow(
+                    child: PrimaryButton(
+                      label: 'Sign in',
+                      size: ButtonSize.lg,
+                      onPressed: _isValid ? _login : null,
+                      isLoading: _isLoading,
+                    ),
                   ),
                   const SizedBox(height: SpacingTokens.xl),
 
@@ -291,7 +299,7 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Sign up link
+                  // Sign up link — accent purple
                   Center(
                     child: GestureDetector(
                       onTap: _goToRegister,
@@ -308,7 +316,7 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
                               text: 'Sign up',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: c.primary,
+                                color: c.accent,
                               ),
                             ),
                           ],

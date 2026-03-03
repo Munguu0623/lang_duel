@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens.dart';
-import '../../../ui/widgets/soft_card.dart';
+import '../../../ui/widgets/pressable_scale.dart';
 import '../../../ui/widgets/top_bar.dart';
 
 /// Duel mode selection — "Choose your battle".
@@ -38,7 +38,7 @@ class ModeSelectScreen extends StatelessWidget {
               enabled: true,
               onTap: () => onModeSelected(10), // 10s for demo
             ),
-            const SizedBox(height: SpacingTokens.md),
+            const SizedBox(height: 0),
             // Entry Duel — disabled
             _ModeCard(
               icon: Icons.school_rounded,
@@ -75,81 +75,98 @@ class _ModeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final color = enabled ? c.primary : c.textSecondary;
     final opacity = enabled ? 1.0 : 0.5;
 
     return Opacity(
       opacity: opacity,
-      child: SoftCard(
+      child: PressableScale(
+        enabled: enabled,
         onTap: enabled ? onTap : null,
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: RadiusTokens.small,
-              ),
-              child: Icon(icon, color: color, size: 24),
+        child: Container(
+          padding: const EdgeInsets.all(SpacingTokens.base),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: c.border, width: 0.5),
             ),
-            const SizedBox(width: SpacingTokens.base),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(title,
-                          style: Theme.of(context).textTheme.titleLarge),
-                      if (!enabled) ...[
-                        const SizedBox(width: SpacingTokens.sm),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: SpacingTokens.sm,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: c.surfaceSecondary,
-                            borderRadius: RadiusTokens.small,
-                          ),
-                          child: Text(
-                            'Soon',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: c.textSecondary,
+          ),
+          child: Row(
+            children: [
+              // Gradient circle icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: enabled
+                        ? [c.primary, c.accent]
+                        : [c.textSecondary, c.textSecondary],
+                  ),
+                ),
+                child: Icon(icon, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: SpacingTokens.base),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(title,
+                            style: Theme.of(context).textTheme.titleLarge),
+                        if (!enabled) ...[
+                          const SizedBox(width: SpacingTokens.sm),
+                          // "Soon" badge — accentLight/accent
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: SpacingTokens.sm,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: c.accentLight,
+                              borderRadius: RadiusTokens.small,
+                            ),
+                            child: Text(
+                              'Soon',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: c.accent,
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  Text(subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.md,
-                vertical: SpacingTokens.xs,
-              ),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: RadiusTokens.small,
-              ),
-              child: Text(
-                duration,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: enabled ? c.textPrimary : c.textSecondary,
+                    ),
+                    const SizedBox(height: SpacingTokens.xs),
+                    Text(subtitle,
+                        style: Theme.of(context).textTheme.bodyMedium),
+                  ],
                 ),
               ),
-            ),
-          ],
+              // Duration badge — accent purple tint
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: c.accent.withValues(alpha: 0.12),
+                  borderRadius: RadiusTokens.small,
+                ),
+                child: Text(
+                  duration,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: enabled ? c.accent : c.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -5,7 +5,7 @@ import '../../../mock/fake_models.dart';
 import '../../../ui/widgets/duel_avatar.dart';
 import '../../../ui/widgets/stat_pill.dart';
 
-/// Large avatar + username + rank/level/win-rate badges.
+/// Large avatar + rank dominant + username + level/win-rate pills.
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({
     super.key,
@@ -16,23 +16,34 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Column(
       children: [
         DuelAvatar(name: user.name, size: 88, showRing: true),
         const SizedBox(height: SpacingTokens.md),
+        // Rank dominant — big number
+        Text(
+          user.rank,
+          style: TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.w800,
+            color: c.primary,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        Text(
+          'Global Rank',
+          style: TextStyles.caption.copyWith(color: c.textSecondary),
+        ),
+        const SizedBox(height: SpacingTokens.sm),
         Text(user.name, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: SpacingTokens.sm),
-        // Badges row
+        // Smaller pills below
         Wrap(
           spacing: SpacingTokens.sm,
           runSpacing: SpacingTokens.xs,
           alignment: WrapAlignment.center,
           children: [
-            StatPill(
-              icon: Icons.shield_rounded,
-              label: user.rank,
-              variant: StatPillVariant.primarySoft,
-            ),
             StatPill(
               icon: Icons.school_rounded,
               label: user.level,

@@ -81,9 +81,9 @@ class _OpponentFoundScreenState extends State<OpponentFoundScreen>
                 child: Text(
                   'VS',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: FontWeight.w800,
-                    color: c.primary,
+                    color: c.accent,
                   ),
                 ),
               ),
@@ -94,23 +94,44 @@ class _OpponentFoundScreenState extends State<OpponentFoundScreen>
             ],
           ),
           const SizedBox(height: SpacingTokens.xxl),
-          AnimatedSwitcher(
-            duration: DurationTokens.normal,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(scale: _scaleController, child: child),
-              );
-            },
-            child: Text(
-              _count > 0 ? '$_count' : 'GO!',
-              key: ValueKey(_count),
-              style: TextStyle(
-                fontSize: 72,
-                fontWeight: FontWeight.w800,
-                color: c.primary,
+          // Countdown with radial glow
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 0.8,
+                    colors: [
+                      c.primary.withValues(alpha: 0.08),
+                      c.accent.withValues(alpha: 0.03),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
               ),
-            ),
+              AnimatedSwitcher(
+                duration: DurationTokens.normal,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(scale: _scaleController, child: child),
+                  );
+                },
+                child: Text(
+                  _count > 0 ? '$_count' : 'GO!',
+                  key: ValueKey(_count),
+                  style: TextStyle(
+                    fontSize: 72,
+                    fontWeight: FontWeight.w800,
+                    color: _count > 0 ? c.primary : c.success,
+                  ),
+                ),
+              ),
+            ],
           ),
           const Spacer(flex: 3),
         ],

@@ -115,6 +115,7 @@ class _LiveDuelScreenState extends State<LiveDuelScreen> {
                     ],
                   ),
                 ),
+                // LIVE badge — accent instead of danger
                 _LiveBadge(),
               ],
             ),
@@ -135,10 +136,19 @@ class _LiveDuelScreenState extends State<LiveDuelScreen> {
           ),
           const SizedBox(height: SpacingTokens.base),
 
-          // Prompt card
+          // Prompt card with left accent border
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.base),
-            child: SoftCard(
+            child: Container(
+              decoration: BoxDecoration(
+                color: c.surface,
+                borderRadius: RadiusTokens.card,
+                boxShadow: context.softShadow,
+                border: Border(
+                  left: BorderSide(color: c.accent, width: 3),
+                ),
+              ),
+              padding: const EdgeInsets.all(SpacingTokens.base),
               child: Column(
                 children: [
                   Text('Topic',
@@ -169,7 +179,7 @@ class _LiveDuelScreenState extends State<LiveDuelScreen> {
           ),
           const SizedBox(height: SpacingTokens.base),
 
-          // Mic button — subtle scale + glow.
+          // Mic button — gradient primary→primaryDark, danger when recording
           GestureDetector(
             onTapDown: (_) => setState(() => _isRecording = true),
             onTapUp: (_) => setState(() => _isRecording = false),
@@ -183,7 +193,14 @@ class _LiveDuelScreenState extends State<LiveDuelScreen> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: _isRecording ? c.danger : c.primary,
+                  gradient: _isRecording
+                      ? null
+                      : LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [c.primary, c.primaryDark],
+                        ),
+                  color: _isRecording ? c.danger : null,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -256,7 +273,7 @@ class _LiveBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: c.danger.withValues(alpha: 0.1),
+        color: c.accent.withValues(alpha: 0.1),
         borderRadius: RadiusTokens.small,
       ),
       child: Row(
@@ -266,7 +283,7 @@ class _LiveBadge extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: c.danger,
+              color: c.accent,
               shape: BoxShape.circle,
             ),
           ),
@@ -276,7 +293,7 @@ class _LiveBadge extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: c.danger,
+              color: c.accent,
             ),
           ),
         ],

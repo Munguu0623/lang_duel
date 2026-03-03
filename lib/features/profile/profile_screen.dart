@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../core/theme/tokens.dart';
 import '../../mock/fake_data.dart';
 import '../../ui/widgets/section_header.dart';
-import '../../ui/widgets/soft_card.dart';
 import 'widgets/badge_row.dart';
 import 'widgets/match_history_tile.dart';
 import 'widgets/profile_header.dart';
@@ -18,7 +17,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     final profile = FakeData.profileData;
     final matches = FakeData.recentMatches;
 
@@ -70,49 +68,26 @@ class ProfileScreen extends StatelessWidget {
           SliverList.builder(
             itemCount: matches.length,
             itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
-                child: MatchHistoryTile(match: matches[index]),
-              );
+              return MatchHistoryTile(match: matches[index]);
             },
           ),
 
-          // ─── Settings actions ──────────────
+          // ─── Settings actions — borderless list ──
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(top: SpacingTokens.lg),
               child: Column(
                 children: [
-                  SoftCard(
+                  _SettingsItem(
+                    icon: Icons.edit_rounded,
+                    label: 'Edit Profile',
                     onTap: () {},
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit_rounded, size: 20,
-                            color: c.textPrimary),
-                        const SizedBox(width: SpacingTokens.md),
-                        Text('Edit Profile',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const Spacer(),
-                        Icon(Icons.arrow_forward_ios_rounded,
-                            size: 14, color: c.textTertiary),
-                      ],
-                    ),
                   ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  SoftCard(
+                  _SettingsItem(
+                    icon: Icons.settings_rounded,
+                    label: 'Settings',
                     onTap: () {},
-                    child: Row(
-                      children: [
-                        Icon(Icons.settings_rounded, size: 20,
-                            color: c.textPrimary),
-                        const SizedBox(width: SpacingTokens.md),
-                        Text('Settings',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const Spacer(),
-                        Icon(Icons.arrow_forward_ios_rounded,
-                            size: 14, color: c.textTertiary),
-                      ],
-                    ),
+                    showDivider: false,
                   ),
                 ],
               ),
@@ -123,6 +98,51 @@ class ProfileScreen extends StatelessWidget {
             child: SizedBox(height: SpacingTokens.xxl),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Borderless list item with bottom divider + trailing arrow.
+class _SettingsItem extends StatelessWidget {
+  const _SettingsItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.showDivider = true,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: SpacingTokens.base,
+        ),
+        decoration: BoxDecoration(
+          border: showDivider
+              ? Border(bottom: BorderSide(color: c.border, width: 0.5))
+              : null,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: c.textPrimary),
+            const SizedBox(width: SpacingTokens.md),
+            Expanded(
+              child: Text(label,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded,
+                size: 14, color: c.textTertiary),
+          ],
+        ),
       ),
     );
   }

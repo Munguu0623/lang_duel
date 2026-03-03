@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../features/auth/auth_flow_controller.dart';
+import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
 import '../../../ui/widgets/top_bar.dart';
 
@@ -63,17 +64,20 @@ class _AvatarSelectScreenState extends State<AvatarSelectScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isSelected
-                                ? c.primary
-                                : Colors.transparent,
-                            width: 2,
-                          ),
+                          // Gradient border for selected, transparent for non-selected
+                          gradient: isSelected
+                              ? LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [c.primary, c.accent],
+                                )
+                              : null,
                         ),
-                        padding:
-                            const EdgeInsets.all(SpacingTokens.xs),
+                        padding: const EdgeInsets.all(3),
                         child: CircleAvatar(
-                          backgroundColor: c.primaryLight,
+                          backgroundColor: isSelected
+                              ? c.surface
+                              : c.surfaceSecondary,
                           child: Text(
                             String.fromCharCode(65 + index),
                             style: TextStyle(
@@ -89,9 +93,11 @@ class _AvatarSelectScreenState extends State<AvatarSelectScreen> {
                 ),
               ),
               const SizedBox(height: SpacingTokens.lg),
-              PrimaryButton(
-                label: 'Continue',
-                onPressed: _continue,
+              CtaGlow(
+                child: PrimaryButton(
+                  label: 'Continue',
+                  onPressed: _continue,
+                ),
               ),
               const SizedBox(height: SpacingTokens.xxl),
             ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../features/auth/auth_flow_controller.dart';
+import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
 import '../../../ui/widgets/soft_chip.dart';
 import '../../../ui/widgets/top_bar.dart';
@@ -52,7 +53,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
               ),
               const SizedBox(height: SpacingTokens.xl),
               Text(
-                'Pick the level that best matches your English today.',
+                'Pick your rank to face worthy opponents.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: SpacingTokens.lg),
@@ -70,13 +71,15 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
               ),
               const SizedBox(height: SpacingTokens.xl),
               Text(
-                'You will be matched with similar opponents. You can change this later in settings.',
+                'You\'ll be matched against opponents at your level. Prove yourself and climb the ranks.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const Spacer(),
-              PrimaryButton(
-                label: 'Continue',
-                onPressed: _continue,
+              CtaGlow(
+                child: PrimaryButton(
+                  label: 'Continue',
+                  onPressed: _continue,
+                ),
               ),
               const SizedBox(height: SpacingTokens.xxl),
             ],

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../mock/fake_models.dart';
 
-/// Horizontal scrollable row of badge items.
+/// Horizontal scrollable row of badge items with alternating colors.
 class BadgeRow extends StatelessWidget {
   const BadgeRow({
     super.key,
@@ -36,8 +36,11 @@ class _BadgeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    // Alternate badge shapes: even = circle, odd = squircle
-    final isCircle = index.isEven;
+    // Alternate: even=primaryLight/primary, odd=accentLight/accent
+    final isEvenIndex = index.isEven;
+    final bgColor = isEvenIndex ? c.primaryLight : c.accentLight;
+    final fgColor = isEvenIndex ? c.primary : c.accent;
+    final isCircle = isEvenIndex;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -46,15 +49,22 @@ class _BadgeItem extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: c.primaryLight,
+            color: bgColor,
             shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
             borderRadius: isCircle ? null : RadiusTokens.medium,
+            boxShadow: [
+              BoxShadow(
+                color: fgColor.withValues(alpha: 0.12),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Center(
             child: Icon(
               _iconForBadge(badge.icon),
               size: 22,
-              color: c.primary,
+              color: fgColor,
             ),
           ),
         ),

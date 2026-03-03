@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../features/auth/auth_flow_controller.dart';
+import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
 import '../../../ui/widgets/top_bar.dart';
 
@@ -113,7 +114,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Center(
                         child: Text(
                           'Join the arena and start dueling',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: c.accent),
                         ),
                       ),
                       const SizedBox(height: SpacingTokens.xxl),
@@ -212,12 +216,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: SpacingTokens.xxl),
 
-                      // Register button
-                      PrimaryButton(
-                        label: 'Create account',
-                        size: ButtonSize.lg,
-                        onPressed: _isValid ? _register : null,
-                        isLoading: _isLoading,
+                      // Register button with CTA glow
+                      CtaGlow(
+                        child: PrimaryButton(
+                          label: 'Create account',
+                          size: ButtonSize.lg,
+                          onPressed: _isValid ? _register : null,
+                          isLoading: _isLoading,
+                        ),
                       ),
                       const SizedBox(height: SpacingTokens.xl),
 
@@ -240,7 +246,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: SpacingTokens.xxl),
 
-                      // Already have account
+                      // Already have account — accent purple
                       Center(
                         child: GestureDetector(
                           onTap: () => Navigator.of(context).pop(),
@@ -257,7 +263,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   text: 'Sign in',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
-                                    color: c.primary,
+                                    color: c.accent,
                                   ),
                                 ),
                               ],

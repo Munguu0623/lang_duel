@@ -37,12 +37,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.base),
       child: CustomScrollView(
         slivers: [
-          // ─── Title ─────────────────────────
+          // ─── Title with arena letterSpacing ──
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(top: SpacingTokens.base),
-              child: Text('Leaderboard',
-                  style: Theme.of(context).textTheme.headlineLarge),
+              child: Text(
+                'Leaderboard',
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      letterSpacing: -0.8,
+                    ),
+              ),
             ),
           ),
 
@@ -65,7 +69,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             ),
           ),
 
-          // ─── Current user rank card ────────
+          // ─── Current user rank card with glow ──
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(top: SpacingTokens.lg),
@@ -98,10 +102,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           SliverList.builder(
             itemCount: rest.length,
             itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
-                child: LeaderboardTile(entry: rest[index]),
-              );
+              return LeaderboardTile(entry: rest[index]);
             },
           ),
 
@@ -123,56 +124,80 @@ class _MyRankCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Container(
-      padding: const EdgeInsets.all(SpacingTokens.base),
-      decoration: BoxDecoration(
-        color: c.primaryLight,
-        borderRadius: RadiusTokens.card,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
+    return Stack(
+      children: [
+        // Subtle radial glow behind card
+        Positioned.fill(
+          child: Container(
             decoration: BoxDecoration(
-              color: c.primary,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                '#${entry.rank}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+              gradient: RadialGradient(
+                center: Alignment.center,
+                radius: 1.2,
+                colors: [
+                  c.primary.withValues(alpha: 0.06),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
-          const SizedBox(width: SpacingTokens.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Your rank',
-                    style: Theme.of(context).textTheme.bodyMedium),
-                Text(
-                  entry.user.name,
-                  style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Container(
+          padding: const EdgeInsets.all(SpacingTokens.base),
+          decoration: BoxDecoration(
+            color: c.primaryLight,
+            borderRadius: RadiusTokens.card,
+          ),
+          child: Row(
+            children: [
+              // Gradient circle rank badge
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [c.primary, c.accent],
+                  ),
                 ),
-              ],
-            ),
+                child: Center(
+                  child: Text(
+                    '#${entry.rank}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Your rank',
+                        style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      entry.user.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${(entry.user.winRate * 100).round()}% WR',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: c.primary,
+                ),
+              ),
+            ],
           ),
-          Text(
-            '${(entry.user.winRate * 100).round()}% WR',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: c.primary,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

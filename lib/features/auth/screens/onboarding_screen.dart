@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
 import '../../../core/motion/motion.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
-import '../../../ui/widgets/soft_card.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -19,17 +19,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   static const _pages = [
     (
-      'Compete in real-time',
+      'Battle in real-time',
       'Face opponents in live English voice battles.',
       Icons.sports_esports_rounded,
     ),
     (
-      'AI-powered scoring',
+      'AI judges every word',
       'Get instant feedback on pronunciation and fluency.',
       Icons.auto_awesome_rounded,
     ),
     (
-      'Climb the ranks',
+      'Dominate the leaderboard',
       'Win duels, earn rating, and move up the ladder.',
       Icons.leaderboard_rounded,
     ),
@@ -103,13 +103,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SoftCard(
-                          padding: const EdgeInsets.all(SpacingTokens.xl),
-                          child: Icon(
-                            icon,
-                            size: 64,
-                            color: c.primary,
+                        // 96px gradient circle with glow
+                        Container(
+                          width: 96,
+                          height: 96,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [c.primary, c.accent],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: c.primary.withValues(alpha: 0.25),
+                                blurRadius: 24,
+                                offset: const Offset(0, 4),
+                              ),
+                              BoxShadow(
+                                color: c.accent.withValues(alpha: 0.15),
+                                blurRadius: 32,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
+                          child: Icon(icon, size: 44, color: Colors.white),
                         ),
                         const SizedBox(height: SpacingTokens.xl),
                         Text(
@@ -148,17 +166,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: isActive ? 20 : 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: isActive ? c.primary : c.surfaceSecondary,
+                          gradient: isActive
+                              ? LinearGradient(
+                                  colors: [c.primary, c.accent],
+                                )
+                              : null,
+                          color: isActive ? null : c.surfaceSecondary,
                           borderRadius: RadiusTokens.pill,
                         ),
                       );
                     }),
                   ),
                   const SizedBox(height: SpacingTokens.lg),
-                  PrimaryButton(
-                    label:
-                        _currentPage == _pages.length - 1 ? 'Get started' : 'Continue',
-                    onPressed: _goNext,
+                  CtaGlow(
+                    child: PrimaryButton(
+                      label: _currentPage == _pages.length - 1
+                          ? 'Enter the arena'
+                          : 'Continue',
+                      onPressed: _goNext,
+                    ),
                   ),
                 ],
               ),

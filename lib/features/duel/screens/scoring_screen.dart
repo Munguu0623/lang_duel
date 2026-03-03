@@ -48,27 +48,47 @@ class _ScoringScreenState extends State<ScoringScreen>
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    // Dot colors: primary, accent, accentCyan
+    final dotColors = [c.primary, c.accent, c.accentCyan];
+
     return SafeArea(
       child: Column(
         children: [
           const TopBar(title: 'Scoring'),
           const Spacer(),
+          // Icon — gradient circle + glow
           Container(
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: c.primaryLight,
               shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [c.primary, c.accent],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: c.primary.withValues(alpha: 0.20),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: c.accent.withValues(alpha: 0.12),
+                  blurRadius: 28,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-            child: Icon(
+            child: const Icon(
               Icons.auto_awesome_rounded,
               size: 36,
-              color: c.primary,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: SpacingTokens.xl),
           Text(
-            'AI is scoring...',
+            'AI is judging...',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: SpacingTokens.md),
@@ -92,7 +112,7 @@ class _ScoringScreenState extends State<ScoringScreen>
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
-                          color: c.primary,
+                          color: dotColors[i],
                           shape: BoxShape.circle,
                         ),
                       ),

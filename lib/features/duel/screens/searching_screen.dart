@@ -71,13 +71,31 @@ class _SearchingScreenState extends State<SearchingScreen>
                     for (var i = 0; i < 3; i++)
                       _PulseCircle(
                         progress: (_pulseController.value + i * 0.33) % 1.0,
+                        useAccent: i.isOdd,
                       ),
+                    // Center circle — gradient primary→accent + glow
                     Container(
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: c.primary,
                         shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [c.primary, c.accent],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: c.primary.withValues(alpha: 0.25),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
+                          ),
+                          BoxShadow(
+                            color: c.accent.withValues(alpha: 0.15),
+                            blurRadius: 28,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
                       child: const Icon(
                         Icons.search_rounded,
@@ -92,7 +110,7 @@ class _SearchingScreenState extends State<SearchingScreen>
           ),
           const SizedBox(height: SpacingTokens.xl),
           Text(
-            'Finding opponent...',
+            'Searching for a worthy opponent...',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: SpacingTokens.sm),
@@ -136,13 +154,15 @@ class _SearchingScreenState extends State<SearchingScreen>
 }
 
 class _PulseCircle extends StatelessWidget {
-  const _PulseCircle({required this.progress});
+  const _PulseCircle({required this.progress, this.useAccent = false});
 
   final double progress;
+  final bool useAccent;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final color = useAccent ? c.accent : c.primary;
     return Opacity(
       opacity: (1.0 - progress).clamp(0.0, 0.3),
       child: Container(
@@ -150,7 +170,7 @@ class _PulseCircle extends StatelessWidget {
         height: 64 + progress * 96,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: c.primary, width: 2),
+          border: Border.all(color: color, width: 2),
         ),
       ),
     );

@@ -4,7 +4,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../mock/fake_models.dart';
 import '../../../ui/widgets/duel_avatar.dart';
 
-/// Single match history row — opponent, result, score, date.
+/// Single match history row — borderless with bottom divider.
 class MatchHistoryTile extends StatelessWidget {
   const MatchHistoryTile({
     super.key,
@@ -27,13 +27,12 @@ class MatchHistoryTile extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.base,
         vertical: SpacingTokens.md,
       ),
       decoration: BoxDecoration(
-        color: c.surface,
-        borderRadius: RadiusTokens.medium,
-        boxShadow: context.softShadow,
+        border: Border(
+          bottom: BorderSide(color: c.border, width: 0.5),
+        ),
       ),
       child: Row(
         children: [

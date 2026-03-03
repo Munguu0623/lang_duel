@@ -6,7 +6,7 @@ import '../../../mock/fake_models.dart';
 import '../../../ui/widgets/duel_avatar.dart';
 
 /// Single row in the leaderboard list.
-/// Current user row gets a subtle primarySoft highlight.
+/// Current user row gets primaryLight highlight; others are borderless + divider.
 class LeaderboardTile extends StatelessWidget {
   const LeaderboardTile({
     super.key,
@@ -26,9 +26,11 @@ class LeaderboardTile extends StatelessWidget {
         vertical: SpacingTokens.md,
       ),
       decoration: BoxDecoration(
-        color: _isCurrentUser ? c.primaryLight : c.surface,
-        borderRadius: RadiusTokens.medium,
-        boxShadow: _isCurrentUser ? null : context.softShadow,
+        color: _isCurrentUser ? c.primaryLight : null,
+        borderRadius: _isCurrentUser ? RadiusTokens.medium : null,
+        border: _isCurrentUser
+            ? null
+            : Border(bottom: BorderSide(color: c.border, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -67,13 +69,13 @@ class LeaderboardTile extends StatelessWidget {
               ],
             ),
           ),
-          // Win rate
+          // Win rate — accent color
           Text(
             '${(entry.user.winRate * 100).round()}%',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: c.primary,
+              color: c.accent,
             ),
           ),
         ],
