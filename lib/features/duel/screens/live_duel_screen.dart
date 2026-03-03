@@ -193,14 +193,7 @@ class _LiveDuelScreenState extends State<LiveDuelScreen> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  gradient: _isRecording
-                      ? null
-                      : LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [c.primary, c.primaryDark],
-                        ),
-                  color: _isRecording ? c.danger : null,
+                  color: _isRecording ? c.danger : c.primary,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(

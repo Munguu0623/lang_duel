@@ -79,21 +79,12 @@ class _SearchingScreenState extends State<SearchingScreen>
                       height: 64,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [c.primary, c.accent],
-                        ),
+                        color: c.primary,
                         boxShadow: [
                           BoxShadow(
-                            color: c.primary.withValues(alpha: 0.25),
+                            color: c.primary.withValues(alpha: 0.30),
                             blurRadius: 20,
                             offset: const Offset(0, 4),
-                          ),
-                          BoxShadow(
-                            color: c.accent.withValues(alpha: 0.15),
-                            blurRadius: 28,
-                            offset: const Offset(0, 8),
                           ),
                         ],
                       ),

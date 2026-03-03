@@ -67,14 +67,7 @@ class SeasonProgressCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      tierColor,
-                      tierColor.withValues(alpha: 0.6),
-                    ],
-                  ),
+                  color: tierColor,
                   borderRadius: RadiusTokens.medium,
                 ),
                 child: const Icon(

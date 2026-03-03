@@ -65,13 +65,7 @@ class _AvatarSelectScreenState extends State<AvatarSelectScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           // Gradient border for selected, transparent for non-selected
-                          gradient: isSelected
-                              ? LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [c.primary, c.accent],
-                                )
-                              : null,
+                          color: isSelected ? c.primary : null,
                         ),
                         padding: const EdgeInsets.all(3),
                         child: CircleAvatar(

@@ -10,9 +10,9 @@ import 'package:google_fonts/google_fonts.dart';
 /// theme-aware resolution. These are kept as a shared reference palette.
 abstract final class Palette {
   // Brand primary — Electric Blue
-  static const primary = Color(0xFF2563EB);
-  static const primaryDark = Color(0xFF1E40AF);
-  static const primaryLight = Color(0xFFDBEAFE);
+  static const primary = Color(0xFF256EF7);
+  static const primaryDark = Color(0xFF1652D4);
+  static const primaryLight = Color(0xFFD6E4FF);
   // Brand accent — Energy Purple
   static const accent = Color(0xFF8B2CF5);
   static const accentDark = Color(0xFF6D28D9);
@@ -44,17 +44,17 @@ class AppColors {
   bool get isDark => brightness == Brightness.dark;
 
   // Background & surfaces
-  Color get background => isDark ? const Color(0xFF0B0F1A) : const Color(0xFFF7F8FC);
-  Color get surface => isDark ? const Color(0xFF141825) : const Color(0xFFFFFFFF);
+  Color get background => isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+  Color get surface => isDark ? const Color(0xFF162035) : const Color(0xFFFFFFFF);
   Color get surfaceSecondary =>
-      isDark ? const Color(0xFF1C2030) : const Color(0xFFF0F1F5);
-  Color get border => isDark ? const Color(0xFF2A2E3D) : const Color(0xFFE8E9ED);
+      isDark ? const Color(0xFF1C2640) : const Color(0xFFF0F2F7);
+  Color get border => isDark ? const Color(0xFF2A3350) : const Color(0xFFE2E8F0);
 
   // Primary — Electric Blue
   Color get primary => Palette.primary;
   Color get primaryDark => Palette.primaryDark;
   Color get primaryLight =>
-      isDark ? const Color(0xFF1E2A4A) : const Color(0xFFDBEAFE);
+      isDark ? const Color(0xFF1A2B50) : const Color(0xFFD6E4FF);
   Color get primaryTint => isDark
       ? Palette.primary.withValues(alpha: 0.06)
       : Palette.primary.withValues(alpha: 0.04);
@@ -70,11 +70,11 @@ class AppColors {
 
   // Text
   Color get textPrimary =>
-      isDark ? const Color(0xFFF0F1F5) : const Color(0xFF1A1A2E);
+      isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
   Color get textSecondary =>
-      isDark ? const Color(0xFF8B8FA3) : const Color(0xFF9CA3AF);
+      isDark ? const Color(0xFF8B8FA3) : const Color(0xFF64748B);
   Color get textTertiary =>
-      isDark ? const Color(0xFF5A5E72) : const Color(0xFFBEC1CC);
+      isDark ? const Color(0xFF4A5068) : const Color(0xFFBEC1CC);
 
   // Status (same for both)
   Color get success => Palette.success;
@@ -102,19 +102,19 @@ extension AppColorsX on BuildContext {
 /// Kept for migration. New code should use `context.colors`.
 abstract final class ColorTokens {
   // Background & surface
-  static const background = Color(0xFFF7F8FC);
+  static const background = Color(0xFFF8FAFC);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceGrey = Color(0xFFF0F1F5);
-  static const border = Color(0xFFE8E9ED);
+  static const surfaceGrey = Color(0xFFF0F2F7);
+  static const border = Color(0xFFE2E8F0);
 
   // Primary blue
-  static const primary = Color(0xFF2563EB);
-  static const primaryDark = Color(0xFF1E40AF);
-  static const primaryLight = Color(0xFFDBEAFE);
+  static const primary = Color(0xFF256EF7);
+  static const primaryDark = Color(0xFF1652D4);
+  static const primaryLight = Color(0xFFD6E4FF);
 
   // Text
-  static const textPrimary = Color(0xFF1A1A2E);
-  static const textSecondary = Color(0xFF9CA3AF);
+  static const textPrimary = Color(0xFF0F172A);
+  static const textSecondary = Color(0xFF64748B);
 
   // Status
   static const success = Color(0xFF10B981);

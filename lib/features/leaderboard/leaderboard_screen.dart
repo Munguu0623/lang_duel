@@ -155,11 +155,7 @@ class _MyRankCard extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [c.primary, c.accent],
-                  ),
+                  color: c.primary,
                 ),
                 child: Center(
                   child: Text(

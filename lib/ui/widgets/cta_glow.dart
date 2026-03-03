@@ -23,8 +23,7 @@ class CtaGlow extends StatelessWidget {
               center: Alignment.center,
               radius: 1.4,
               colors: [
-                c.primary.withValues(alpha: 0.10),
-                c.accent.withValues(alpha: 0.04),
+                c.primary.withValues(alpha: 0.12),
                 Colors.transparent,
               ],
             ),

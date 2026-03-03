@@ -109,21 +109,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           height: 96,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [c.primary, c.accent],
-                            ),
+                            color: c.primary,
                             boxShadow: [
                               BoxShadow(
-                                color: c.primary.withValues(alpha: 0.25),
+                                color: c.primary.withValues(alpha: 0.30),
                                 blurRadius: 24,
                                 offset: const Offset(0, 4),
-                              ),
-                              BoxShadow(
-                                color: c.accent.withValues(alpha: 0.15),
-                                blurRadius: 32,
-                                offset: const Offset(0, 8),
                               ),
                             ],
                           ),
@@ -166,12 +157,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: isActive ? 20 : 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          gradient: isActive
-                              ? LinearGradient(
-                                  colors: [c.primary, c.accent],
-                                )
-                              : null,
-                          color: isActive ? null : c.surfaceSecondary,
+                          color: isActive ? c.primary : c.surfaceSecondary,
                           borderRadius: RadiusTokens.pill,
                         ),
                       );

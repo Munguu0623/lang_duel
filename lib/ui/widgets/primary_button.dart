@@ -67,14 +67,7 @@ class _PrimaryButtonState extends State<PrimaryButton> {
           duration: MotionDurations.fast,
           height: _height,
           decoration: BoxDecoration(
-            gradient: enabled
-                ? LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [c.primary, c.primaryDark],
-                  )
-                : null,
-            color: enabled ? null : c.surfaceSecondary,
+            color: enabled ? c.primary : c.surfaceSecondary,
             borderRadius: RadiusTokens.pill,
             boxShadow: enabled ? ElevationTokens.primaryGlow(glowOpacity) : null,
           ),

@@ -97,13 +97,7 @@ class _ModeCard extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: enabled
-                        ? [c.primary, c.accent]
-                        : [c.textSecondary, c.textSecondary],
-                  ),
+                  color: enabled ? c.primary : c.textSecondary,
                 ),
                 child: Icon(icon, color: Colors.white, size: 24),
               ),

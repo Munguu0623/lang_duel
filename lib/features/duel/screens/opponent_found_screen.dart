@@ -107,7 +107,6 @@ class _OpponentFoundScreenState extends State<OpponentFoundScreen>
                     radius: 0.8,
                     colors: [
                       c.primary.withValues(alpha: 0.08),
-                      c.accent.withValues(alpha: 0.03),
                       Colors.transparent,
                     ],
                   ),

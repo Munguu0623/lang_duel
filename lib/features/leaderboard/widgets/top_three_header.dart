@@ -114,14 +114,7 @@ class _PodiumItem extends StatelessWidget {
           width: 80,
           height: podiumHeight,
           decoration: BoxDecoration(
-            color: isFirst ? null : colorSoft,
-            gradient: isFirst
-                ? LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [color, color.withValues(alpha: 0.7)],
-                  )
-                : null,
+            color: isFirst ? color : colorSoft,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(12),
             ),
