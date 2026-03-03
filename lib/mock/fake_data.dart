@@ -127,6 +127,7 @@ class FakeData {
       yourScore: 78,
       theirScore: 65,
       createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+      rankChange: 3,
     ),
     RecentMatch(
       opponent: opponents[3],
@@ -134,6 +135,7 @@ class FakeData {
       yourScore: 62,
       theirScore: 71,
       createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+      rankChange: -2,
     ),
     RecentMatch(
       opponent: opponents[0],
@@ -141,6 +143,7 @@ class FakeData {
       yourScore: 81,
       theirScore: 74,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      rankChange: 5,
     ),
     RecentMatch(
       opponent: opponents[6],
@@ -148,6 +151,7 @@ class FakeData {
       yourScore: 73,
       theirScore: 68,
       createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 8)),
+      rankChange: 1,
     ),
     RecentMatch(
       opponent: opponents[4],
@@ -155,6 +159,7 @@ class FakeData {
       yourScore: 59,
       theirScore: 77,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      rankChange: -4,
     ),
   ];
 }

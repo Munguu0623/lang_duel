@@ -4,8 +4,8 @@ import '../../../core/theme/tokens.dart';
 import '../../../mock/fake_models.dart';
 import '../../../ui/widgets/duel_avatar.dart';
 
-/// Single match tile — avatar, result chip, score, time ago.
-/// Borderless list item style with subtle divider.
+/// Single match tile — clean list style with subtle win/loss and rank movement.
+/// Borderless with divider separator.
 class RecentMatchTile extends StatelessWidget {
   const RecentMatchTile({
     super.key,
@@ -79,21 +79,59 @@ class RecentMatchTile extends StatelessWidget {
                       // Score
                       Text(
                         '${match.yourScore}-${match.theirScore}',
-                        style: TextStyles.caption.copyWith(
-                            color: c.textSecondary),
+                        style: TextStyles.caption
+                            .copyWith(color: c.textSecondary),
                       ),
                       const SizedBox(width: SpacingTokens.sm),
                       // Time ago
                       Text(
                         _timeAgo(match.createdAt),
-                        style: TextStyles.caption.copyWith(
-                            color: c.textSecondary),
+                        style: TextStyles.caption
+                            .copyWith(color: c.textSecondary),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
+            // Rank movement indicator
+            if (match.rankChange != 0) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: (match.rankChange > 0 ? c.success : c.danger)
+                      .withValues(alpha: 0.1),
+                  borderRadius: RadiusTokens.pill,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      match.rankChange > 0
+                          ? Icons.arrow_upward_rounded
+                          : Icons.arrow_downward_rounded,
+                      size: 10,
+                      color:
+                          match.rankChange > 0 ? c.success : c.danger,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      '${match.rankChange.abs()}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color:
+                            match.rankChange > 0 ? c.success : c.danger,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+            ],
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 14,

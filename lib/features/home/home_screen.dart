@@ -9,12 +9,18 @@ import 'widgets/home_header.dart';
 import 'widgets/quick_stats_row.dart';
 import 'widgets/recent_match_tile.dart';
 import 'widgets/season_progress_card.dart';
+import 'widgets/social_energy_strip.dart';
 import 'widgets/start_duel_card.dart';
 
-/// Home tab — greeting, stats, Start Duel CTA, season, recent matches.
+/// Home tab — competitive arena feel.
 ///
-/// Performance: SliverList.builder for match list, const where possible,
-/// widgets split into separate files to avoid monolithic build method.
+/// Layout order:
+/// 1. Compact header (notification + level + avatar)
+/// 2. Hero section (competitive headline + CTA with glow)
+/// 3. Stat hierarchy (rank dominant, win rate, streak)
+/// 4. Social energy strip (live activity indicators)
+/// 5. Season progression (tier + countdown)
+/// 6. Recent matches (clean list)
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -34,16 +40,30 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.only(top: SpacingTokens.base),
               child: HomeHeader(
                 username: user.name,
+                level: user.level,
                 onNotificationTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notifications coming soon')),
+                    const SnackBar(
+                        content: Text('Notifications coming soon')),
                   );
                 },
               ),
             ),
           ),
 
-          // ─── Quick Stats ─────────────────────────
+          // ─── Hero Section (Arena CTA) ──────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(top: SpacingTokens.xxl),
+              child: StartDuelCard(
+                onStartDuel: () => Routes.goToDuelMode(context),
+                streak: user.streak,
+                rankChange: 5,
+              ),
+            ),
+          ),
+
+          // ─── Stat Hierarchy ────────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(top: SpacingTokens.xl),
@@ -51,22 +71,19 @@ class HomeScreen extends StatelessWidget {
                 rank: 128,
                 winRate: user.winRate,
                 streak: user.streak,
-                level: user.level,
               ),
             ),
           ),
 
-          // ─── Start Duel CTA ──────────────────────
+          // ─── Social Energy Strip ───────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(top: SpacingTokens.xxl),
-              child: StartDuelCard(
-                onStartDuel: () => Routes.goToDuelMode(context),
-              ),
+              padding: const EdgeInsets.only(top: SpacingTokens.xl),
+              child: const SocialEnergyStrip(),
             ),
           ),
 
-          // ─── Season Progress ─────────────────────
+          // ─── Season Progress ───────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(top: SpacingTokens.xl),
@@ -74,7 +91,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // ─── Recent Matches header ───────────────
+          // ─── Recent Matches header ─────────────
           SliverToBoxAdapter(
             child: SectionHeader(
               title: 'Recent matches',
@@ -83,7 +100,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // ─── Match list or empty state ───────────
+          // ─── Match list or empty state ─────────
           if (matches.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
@@ -100,7 +117,8 @@ class HomeScreen extends StatelessWidget {
               itemCount: matches.length,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+                  padding:
+                      const EdgeInsets.only(bottom: SpacingTokens.md),
                   child: RecentMatchTile(
                     match: matches[index],
                     onTap: () {
@@ -119,7 +137,7 @@ class HomeScreen extends StatelessWidget {
 
           // Bottom padding
           const SliverToBoxAdapter(
-            child: SizedBox(height: SpacingTokens.base),
+            child: SizedBox(height: SpacingTokens.xxl),
           ),
         ],
       ),

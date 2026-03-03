@@ -86,6 +86,7 @@ class RecentMatch {
     required this.yourScore,
     required this.theirScore,
     required this.createdAt,
+    this.rankChange = 0,
   });
 
   final DuelUser opponent;
@@ -93,6 +94,7 @@ class RecentMatch {
   final int yourScore;
   final int theirScore;
   final DateTime createdAt;
+  final int rankChange;
 }
 
 /// Badge earned by user (mock).

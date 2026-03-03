@@ -4,43 +4,51 @@ import '../../../core/theme/tokens.dart';
 import '../../../ui/widgets/duel_avatar.dart';
 import '../../../ui/widgets/ghost_icon_button.dart';
 
-/// Top section: notification icon + greeting + avatar.
+/// Compact top bar: notification + level badge + avatar.
+/// Greeting moved to hero section for competitive feel.
 class HomeHeader extends StatelessWidget {
   const HomeHeader({
     super.key,
     required this.username,
+    required this.level,
     required this.onNotificationTap,
   });
 
   final String username;
+  final String level;
   final VoidCallback onNotificationTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final c = context.colors;
+    return Row(
       children: [
-        // Top row — notification + avatar
-        Row(
-          children: [
-            GhostIconButton(
-              icon: Icons.notifications_none_rounded,
-              onTap: onNotificationTap,
+        GhostIconButton(
+          icon: Icons.notifications_none_rounded,
+          onTap: onNotificationTap,
+        ),
+        const SizedBox(width: SpacingTokens.sm),
+        // Level badge — minimal, secondary
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingTokens.md,
+            vertical: SpacingTokens.xs,
+          ),
+          decoration: BoxDecoration(
+            color: c.surfaceSecondary,
+            borderRadius: RadiusTokens.pill,
+          ),
+          child: Text(
+            level,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: c.textSecondary,
             ),
-            const Spacer(),
-            DuelAvatar(name: username, size: 40),
-          ],
+          ),
         ),
-        const SizedBox(height: SpacingTokens.lg),
-        // Greeting
-        Text(
-          'Hello,',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        Text(
-          username,
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
+        const Spacer(),
+        DuelAvatar(name: username, size: 40),
       ],
     );
   }

@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeOut,
     );
 
-    // Content stagger: title → subtitle → loader
+    // Content stagger: title -> subtitle -> loader
     _contentController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Subtle pulse on icon glow
+    // Subtle pulse on logo glow
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
@@ -111,7 +111,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon with animated glow
+            // Logo with blue-purple glow
             FadeTransition(
               opacity: _iconFade,
               child: ScaleTransition(
@@ -125,24 +125,29 @@ class _SplashScreenState extends State<SplashScreen>
                       height: 96,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [c.primary, c.primaryDark],
-                        ),
                         boxShadow: [
                           BoxShadow(
                             color: c.primary.withValues(
-                                alpha: 0.2 + pulseValue * 0.15),
+                                alpha: 0.15 + pulseValue * 0.12),
                             blurRadius: 24 + pulseValue * 12,
                             spreadRadius: pulseValue * 4,
                           ),
+                          BoxShadow(
+                            color: c.accent.withValues(
+                                alpha: 0.10 + pulseValue * 0.08),
+                            blurRadius: 32 + pulseValue * 8,
+                            spreadRadius: pulseValue * 2,
+                            offset: const Offset(4, 4),
+                          ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.bolt_rounded,
-                        size: 44,
-                        color: Colors.white,
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/icon/langduel_applogo.png',
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     );
                   },
@@ -158,7 +163,7 @@ class _SplashScreenState extends State<SplashScreen>
               child: SlideTransition(
                 position: _titleSlide,
                 child: Text(
-                  'ENGLISH DUEL',
+                  'LANG DUEL',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,

@@ -9,13 +9,21 @@ import 'package:google_fonts/google_fonts.dart';
 /// Static color references. Use [AppColors] via `context.colors` for
 /// theme-aware resolution. These are kept as a shared reference palette.
 abstract final class Palette {
-  // Shared
-  static const primary = Color(0xFF3B82F6);
-  static const primaryDark = Color(0xFF2563EB);
+  // Brand primary — Electric Blue
+  static const primary = Color(0xFF2563EB);
+  static const primaryDark = Color(0xFF1E40AF);
   static const primaryLight = Color(0xFFDBEAFE);
+  // Brand accent — Energy Purple
+  static const accent = Color(0xFF8B2CF5);
+  static const accentDark = Color(0xFF6D28D9);
+  static const accentLight = Color(0xFFF0E6FF);
+  // Brand highlight — Neon Cyan
+  static const accentCyan = Color(0xFF38BDF8);
+  // Status
   static const success = Color(0xFF10B981);
   static const danger = Color(0xFFEF4444);
   static const warning = Color(0xFFF59E0B);
+  // Rank
   static const gold = Color(0xFFF59E0B);
   static const goldSoft = Color(0xFFFFF8E1);
   static const silver = Color(0xFF9CA3AF);
@@ -42,7 +50,7 @@ class AppColors {
       isDark ? const Color(0xFF1C2030) : const Color(0xFFF0F1F5);
   Color get border => isDark ? const Color(0xFF2A2E3D) : const Color(0xFFE8E9ED);
 
-  // Primary
+  // Primary — Electric Blue
   Color get primary => Palette.primary;
   Color get primaryDark => Palette.primaryDark;
   Color get primaryLight =>
@@ -50,6 +58,15 @@ class AppColors {
   Color get primaryTint => isDark
       ? Palette.primary.withValues(alpha: 0.06)
       : Palette.primary.withValues(alpha: 0.04);
+
+  // Accent — Energy Purple
+  Color get accent => Palette.accent;
+  Color get accentDark => Palette.accentDark;
+  Color get accentLight =>
+      isDark ? const Color(0xFF2A1A4A) : Palette.accentLight;
+
+  // Highlight — Neon Cyan
+  Color get accentCyan => Palette.accentCyan;
 
   // Text
   Color get textPrimary =>
@@ -91,8 +108,8 @@ abstract final class ColorTokens {
   static const border = Color(0xFFE8E9ED);
 
   // Primary blue
-  static const primary = Color(0xFF3B82F6);
-  static const primaryDark = Color(0xFF2563EB);
+  static const primary = Color(0xFF2563EB);
+  static const primaryDark = Color(0xFF1E40AF);
   static const primaryLight = Color(0xFFDBEAFE);
 
   // Text
