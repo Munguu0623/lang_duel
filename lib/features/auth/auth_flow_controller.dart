@@ -8,6 +8,8 @@ class AuthFlowController extends ChangeNotifier {
   int? _avatarId;
   String? _level;
   bool _isGuest = false;
+  bool _isAuthenticated = false;
+  bool _hasSeenOnboarding = false;
 
   String? get username => _username;
   set username(String? value) {
@@ -33,11 +35,33 @@ class AuthFlowController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Whether the user has completed authentication (login or register).
+  bool get isAuthenticated => _isAuthenticated;
+
+  /// Whether the user is browsing anonymously (not yet authenticated).
+  bool get isAnonymous => !_isAuthenticated;
+
+  /// Whether onboarding has been shown at least once.
+  bool get hasSeenOnboarding => _hasSeenOnboarding;
+  set hasSeenOnboarding(bool value) {
+    _hasSeenOnboarding = value;
+    notifyListeners();
+  }
+
+  /// Mark user as authenticated after successful login/register.
+  void markAuthenticated({required String username}) {
+    _username = username;
+    _isAuthenticated = true;
+    _isGuest = false;
+    notifyListeners();
+  }
+
   void reset() {
     _username = null;
     _avatarId = null;
     _level = null;
     _isGuest = false;
+    _isAuthenticated = false;
     notifyListeners();
   }
 }

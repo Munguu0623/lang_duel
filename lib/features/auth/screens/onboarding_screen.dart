@@ -5,6 +5,7 @@ import '../../../core/motion/motion.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
+import '../auth_flow_controller.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -37,7 +38,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _goNext() {
     if (_currentPage == _pages.length - 1) {
-      Navigator.of(context).pushReplacementNamed(Routes.authChoice);
+      _finishOnboarding();
     } else {
       _pageController.nextPage(
         duration: MotionDurations.med,
@@ -47,7 +48,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _skip() {
-    Navigator.of(context).pushReplacementNamed(Routes.authChoice);
+    _finishOnboarding();
+  }
+
+  void _finishOnboarding() {
+    authFlowController.hasSeenOnboarding = true;
+    Navigator.of(context).pushReplacementNamed(Routes.root);
   }
 
   @override

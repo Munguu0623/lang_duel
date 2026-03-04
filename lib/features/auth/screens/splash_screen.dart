@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
+import '../auth_flow_controller.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -86,7 +87,11 @@ class _SplashScreenState extends State<SplashScreen>
     _logoController.forward().then((_) => _contentController.forward());
     Timer(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(Routes.onboarding);
+      // Skip onboarding if already seen — go straight to the app.
+      final destination = authFlowController.hasSeenOnboarding
+          ? Routes.root
+          : Routes.onboarding;
+      Navigator.of(context).pushReplacementNamed(destination);
     });
   }
 

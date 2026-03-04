@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../features/auth/widgets/auth_bottom_sheet.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/leaderboard/leaderboard_screen.dart';
 import '../../features/profile/profile_screen.dart';
@@ -25,12 +26,21 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
 
-  void _onNavTap(int index) {
-    // Duel tab (index 1) launches fullscreen flow instead of switching tab.
+  Future<void> _onNavTap(int index) async {
+    // Duel tab (index 1) — requires auth, then launches fullscreen flow.
     if (index == 1) {
+      final authed = await requireAuth(context, reason: AuthReason.duel);
+      if (!authed || !mounted) return;
       Routes.goToDuelMode(context);
       return;
     }
+
+    // Profile tab (index 3) — requires auth.
+    if (index == 3) {
+      final authed = await requireAuth(context, reason: AuthReason.profile);
+      if (!authed || !mounted) return;
+    }
+
     setState(() => _currentIndex = index);
   }
 
@@ -89,7 +99,14 @@ class _DuelTabPlaceholder extends StatelessWidget {
             const SizedBox(height: SpacingTokens.xl),
             PrimaryButton(
               label: 'Start Duel',
-              onPressed: () => Routes.goToDuelMode(context),
+              onPressed: () async {
+                final authed = await requireAuth(
+                  context,
+                  reason: AuthReason.duel,
+                );
+                if (!authed || !context.mounted) return;
+                Routes.goToDuelMode(context);
+              },
               expanded: false,
             ),
           ],

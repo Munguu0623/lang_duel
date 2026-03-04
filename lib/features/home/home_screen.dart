@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/routes.dart';
 import '../../core/theme/tokens.dart';
+import '../../features/auth/widgets/auth_bottom_sheet.dart';
 import '../../mock/fake_data.dart';
 import '../../ui/widgets/empty_state.dart';
 import '../../ui/widgets/section_header.dart';
@@ -56,7 +57,14 @@ class HomeScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: SpacingTokens.xxl),
               child: StartDuelCard(
-                onStartDuel: () => Routes.goToDuelMode(context),
+                onStartDuel: () async {
+                  final authed = await requireAuth(
+                    context,
+                    reason: AuthReason.duel,
+                  );
+                  if (!authed || !context.mounted) return;
+                  Routes.goToDuelMode(context);
+                },
                 streak: user.streak,
                 rankChange: 5,
               ),
@@ -109,7 +117,14 @@ class HomeScreen extends StatelessWidget {
                 title: 'No matches yet',
                 subtitle: 'Start your first duel and see results here.',
                 actionLabel: 'Start first duel',
-                onAction: () => Routes.goToDuelMode(context),
+                onAction: () async {
+                  final authed = await requireAuth(
+                    context,
+                    reason: AuthReason.duel,
+                  );
+                  if (!authed || !context.mounted) return;
+                  Routes.goToDuelMode(context);
+                },
               ),
             )
           else

@@ -63,9 +63,9 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
     if (!mounted) return;
 
     // Mock: accept any valid input
-    authFlowController
-      ..isGuest = false
-      ..username = _usernameController.text.trim();
+    authFlowController.markAuthenticated(
+      username: _usernameController.text.trim(),
+    );
 
     setState(() => _isLoading = false);
 
