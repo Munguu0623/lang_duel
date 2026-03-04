@@ -5,7 +5,7 @@ import '../../../core/motion/motion.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
-import '../auth_flow_controller.dart';
+import '../auth_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -52,8 +52,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _finishOnboarding() {
-    authFlowController.hasSeenOnboarding = true;
-    Navigator.of(context).pushReplacementNamed(Routes.root);
+    // Persist to disk so the splash never shows onboarding again.
+    authService.markOnboardingSeen();
+    // New users go to auth; returning guests/logged-in users skip to home.
+    final destination =
+        authService.isLoggedIn ? Routes.root : Routes.authChoice;
+    Navigator.of(context).pushReplacementNamed(destination);
   }
 
   @override

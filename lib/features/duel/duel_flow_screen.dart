@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/tokens.dart';
 import '../../app/routes.dart';
+import '../../features/auth/auth_flow_controller.dart';
+import 'data/duel_models.dart';
 import 'duel_flow_controller.dart';
 import 'duel_state.dart';
 import 'screens/mode_select_screen.dart';
@@ -11,14 +13,15 @@ import 'screens/live_duel_screen.dart';
 import 'screens/scoring_screen.dart';
 import 'screens/unified_result_screen.dart';
 
-/// Fullscreen duel flow — bottom nav is hidden during the entire session.
+/// Дуэлийн бүтэн дэлгэцийн урсгал — сесс явагдах хугацаанд доод навигаци нуугдана.
 ///
-/// Performance notes:
-/// - ValueListenableBuilder scopes rebuilds to the body only, not the Scaffold.
-/// - AnimatedSwitcher cross-fades between screens without rebuilding siblings.
-/// - Each child screen has a unique ValueKey so AnimatedSwitcher knows when to animate.
-/// - PopScope prevents accidental back-navigation during a live duel.
-/// - DuelStateNotifier is created once and disposed with this widget — no leaks.
+/// Гүйцэтгэлийн тэмдэглэл:
+/// - ValueListenableBuilder зөвхөн body-г дахин байгуулж, Scaffold-г дахин байгуулдаггүй.
+/// - AnimatedSwitcher дэлгэцүүдийн хооронд cross-fade хийж, ах дүү widget-уудыг
+///   дахин байгуулдаггүй.
+/// - Хүүхэд дэлгэц бүрд өвөрмөц ValueKey байгаа тул AnimatedSwitcher анимаци мэднэ.
+/// - PopScope нь дуэль явагдах үед санамсаргүй буцах навигацийг хаана.
+/// - DuelController нэг удаа үүсч, widget устахад dispose хийгднэ — санах ой алдагддаггүй.
 class DuelFlowScreen extends StatefulWidget {
   const DuelFlowScreen({super.key});
 
@@ -43,7 +46,7 @@ class _DuelFlowScreenState extends State<DuelFlowScreen> {
         if (didPop) return;
         final status = _controller.value.status;
         if (status == DuelStatus.idle || status == DuelStatus.result) {
-          // From mode-select or result → go Home
+          // Горим сонголт эсвэл үр дүн → Нүүр хуудас руу
           Routes.backToHomeRoot(context);
         } else {
           _controller.reset();
@@ -76,9 +79,16 @@ class _DuelFlowScreenState extends State<DuelFlowScreen> {
         ),
       DuelStatus.searching => SearchingScreen(
           key: const ValueKey('search'),
+          // Онбординг үед хэрэглэгчийн сонгосон CEFR түвшин.
+          // Түвшин сонгоогүй бол B1 буцаана.
+          cefrLevel: authFlowController.level ?? 'B1',
           onCancel: () => _controller.reset(),
-          onFound: (opp) {
-            _controller.opponentFound(opp);
+          // MatchedTicket — жинхэнэ өрсөлдөгч + серверийн сонгосон prompt агуулна.
+          onFound: (MatchedTicket match) {
+            _controller.opponentFound(
+              match.opponent.toDuelUser(),
+              prompt: match.prompt,
+            );
             _controller.startCountdown();
           },
         ),

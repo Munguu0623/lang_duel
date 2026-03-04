@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../features/auth/auth_flow_controller.dart';
+import '../../../features/auth/auth_service.dart';
 import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
 
-/// Login screen — username + password with validation.
+/// Login screen — email + password, wired to POST /auth/login.
 class AuthChoiceScreen extends StatefulWidget {
   const AuthChoiceScreen({super.key});
 
@@ -15,38 +17,39 @@ class AuthChoiceScreen extends StatefulWidget {
 }
 
 class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
-  final _usernameController = TextEditingController();
+  // "Username" → "Email": the backend uses email as the primary identifier.
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _usernameFocus = FocusNode();
+  final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
 
   bool _obscurePassword = true;
   bool _isLoading = false;
   String? _errorMessage;
 
+  /// Basic gate: non-empty email + 6-char password.
+  /// Deep email-format validation happens server-side.
   bool get _isValid =>
-      _usernameController.text.trim().length >= 3 &&
+      _emailController.text.trim().contains('@') &&
       _passwordController.text.length >= 6;
 
   @override
   void initState() {
     super.initState();
-    _usernameController.addListener(_clearError);
+    _emailController.addListener(_clearError);
     _passwordController.addListener(_clearError);
   }
 
   void _clearError() {
-    if (_errorMessage != null) {
-      setState(() => _errorMessage = null);
-    }
-    setState(() {}); // refresh button state
+    if (_errorMessage != null) setState(() => _errorMessage = null);
+    setState(() {}); // refresh button enabled state
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
-    _usernameFocus.dispose();
+    _emailFocus.dispose();
     _passwordFocus.dispose();
     super.dispose();
   }
@@ -58,22 +61,33 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
       _errorMessage = null;
     });
 
-    // Simulate network delay
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
-    if (!mounted) return;
+    try {
+      // Call POST /auth/login → persist token → return AuthUser.
+      final user = await authService.login(
+        _emailController.text.trim().toLowerCase(),
+        _passwordController.text,
+      );
 
-    // Mock: accept any valid input
-    authFlowController.markAuthenticated(
-      username: _usernameController.text.trim(),
-    );
+      // Sync display name into the lightweight UI flow controller.
+      authFlowController.markAuthenticated(username: user.name);
 
-    setState(() => _isLoading = false);
-
-    if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      Routes.root,
-      (route) => false,
-    );
+      if (!mounted) return;
+      // Replace the entire stack so Back doesn't return to the login screen.
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        Routes.root,
+        (route) => false,
+      );
+    } on ApiException catch (e) {
+      // Серверийн typed алдаа — _humanize()-аас ирсэн монгол мессеж.
+      setState(() => _errorMessage = e.message);
+    } catch (e, st) {
+      // ApiException биш аливаа алдаа (SSL, cast, platform гэх мэт) —
+      // debug console-д бичиж, хэрэглэгчид ерөнхий мессеж харуулна.
+      debugPrint('[Login] Тодорхойгүй алдаа: $e\n$st');
+      setState(() => _errorMessage = 'Холболтын алдаа гарлаа. Дахин оролдоно уу.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _goToRegister() {
@@ -150,13 +164,14 @@ class _AuthChoiceScreenState extends State<AuthChoiceScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Username field
+                  // Email field — backend uses email as the login identifier.
                   _InputField(
-                    controller: _usernameController,
-                    focusNode: _usernameFocus,
-                    label: 'Username',
-                    hint: 'Enter your username',
-                    icon: Icons.person_outline_rounded,
+                    controller: _emailController,
+                    focusNode: _emailFocus,
+                    label: 'Email',
+                    hint: 'Enter your email',
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     onSubmitted: (_) => _passwordFocus.requestFocus(),
                   ),
@@ -336,6 +351,7 @@ class _InputField extends StatelessWidget {
     required this.icon,
     this.obscure = false,
     this.suffixIcon,
+    this.keyboardType,
     this.textInputAction,
     this.onSubmitted,
   });
@@ -347,6 +363,7 @@ class _InputField extends StatelessWidget {
   final IconData icon;
   final bool obscure;
   final Widget? suffixIcon;
+  final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
 
@@ -374,6 +391,7 @@ class _InputField extends StatelessWidget {
             controller: controller,
             focusNode: focusNode,
             obscureText: obscure,
+            keyboardType: keyboardType,
             textInputAction: textInputAction,
             onSubmitted: onSubmitted,
             style: TextStyle(

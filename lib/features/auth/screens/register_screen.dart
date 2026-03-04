@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../features/auth/auth_flow_controller.dart';
+import '../../../features/auth/auth_service.dart';
 import '../../../ui/widgets/cta_glow.dart';
 import '../../../ui/widgets/primary_button.dart';
 import '../../../ui/widgets/top_bar.dart';
 
-/// Registration screen — username, password, confirm password.
+/// Registration screen — email, display name, password, confirm password.
+///
+/// Calls POST /auth/register on submit.  On success the JWT is persisted by
+/// [AuthService] and the user continues to avatar selection.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -16,9 +21,12 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _usernameController = TextEditingController();
+  // Field order mirrors the API: email → name → password → confirm.
+  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController(); // maps to API "name"
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+  final _emailFocus = FocusNode();
   final _usernameFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _confirmFocus = FocusNode();
@@ -29,6 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _errorMessage;
 
   bool get _isValid =>
+      _emailController.text.trim().contains('@') &&
       _usernameController.text.trim().length >= 3 &&
       _passwordController.text.length >= 6 &&
       _passwordController.text == _confirmController.text;
@@ -42,23 +51,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
+    _emailController.addListener(_onChanged);
     _usernameController.addListener(_onChanged);
     _passwordController.addListener(_onChanged);
     _confirmController.addListener(_onChanged);
   }
 
   void _onChanged() {
-    if (_errorMessage != null) {
-      setState(() => _errorMessage = null);
-    }
+    if (_errorMessage != null) setState(() => _errorMessage = null);
     setState(() {});
   }
 
   @override
   void dispose() {
+    _emailController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
+    _emailFocus.dispose();
     _usernameFocus.dispose();
     _passwordFocus.dispose();
     _confirmFocus.dispose();
@@ -72,19 +82,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _errorMessage = null;
     });
 
-    // Simulate network delay
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
-    if (!mounted) return;
+    try {
+      // Call POST /auth/register → persist token → return AuthUser.
+      final user = await authService.register(
+        email: _emailController.text.trim().toLowerCase(),
+        password: _passwordController.text,
+        name: _usernameController.text.trim(),
+      );
 
-    // Mock: accept any valid input, go to avatar selection
-    authFlowController.markAuthenticated(
-      username: _usernameController.text.trim(),
-    );
+      // Sync display name into the lightweight UI flow controller.
+      authFlowController.markAuthenticated(username: user.name);
 
-    setState(() => _isLoading = false);
-
-    if (!mounted) return;
-    Navigator.of(context).pushNamed(Routes.avatar);
+      if (!mounted) return;
+      // Continue to avatar selection for new users.
+      Navigator.of(context).pushNamed(Routes.avatar);
+    } on ApiException catch (e) {
+      setState(() => _errorMessage = e.message);
+    } catch (e, st) {
+      debugPrint('[Register] Тодорхойгүй алдаа: $e\n$st');
+      setState(() => _errorMessage = 'Холболтын алдаа гарлаа. Дахин оролдоно уу.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -122,12 +141,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: SpacingTokens.xxl),
 
-                      // Username
+                      // Email — used as the login identifier on the backend.
+                      _InputField(
+                        controller: _emailController,
+                        focusNode: _emailFocus,
+                        label: 'Email',
+                        hint: 'Enter your email',
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) => _usernameFocus.requestFocus(),
+                      ),
+                      const SizedBox(height: SpacingTokens.lg),
+
+                      // Display name — shown to opponents (maps to API "name").
                       _InputField(
                         controller: _usernameController,
                         focusNode: _usernameFocus,
                         label: 'Username',
-                        hint: 'Choose a unique name',
+                        hint: 'Choose a display name',
                         icon: Icons.person_outline_rounded,
                         textInputAction: TextInputAction.next,
                         onSubmitted: (_) => _passwordFocus.requestFocus(),
@@ -294,6 +326,7 @@ class _InputField extends StatelessWidget {
     required this.icon,
     this.obscure = false,
     this.suffixIcon,
+    this.keyboardType,
     this.textInputAction,
     this.onSubmitted,
     this.helperText,
@@ -307,6 +340,7 @@ class _InputField extends StatelessWidget {
   final IconData icon;
   final bool obscure;
   final Widget? suffixIcon;
+  final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
   final String? helperText;
@@ -336,6 +370,7 @@ class _InputField extends StatelessWidget {
             controller: controller,
             focusNode: focusNode,
             obscureText: obscure,
+            keyboardType: keyboardType,
             textInputAction: textInputAction,
             onSubmitted: onSubmitted,
             style: TextStyle(

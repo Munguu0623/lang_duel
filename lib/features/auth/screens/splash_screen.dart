@@ -1,11 +1,10 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
-import '../auth_flow_controller.dart';
+import '../auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -83,14 +82,34 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 2400),
     )..repeat();
 
-    // Sequence: logo → content → navigate
+    // Sequence: logo → content → navigate.
+    //
+    // Run the minimum animation time (2 200 ms) and the AuthService init in
+    // parallel.  Navigate only after BOTH complete so the splash always plays
+    // its full sequence while the token validation happens in the background.
     _logoController.forward().then((_) => _contentController.forward());
-    Timer(const Duration(milliseconds: 2200), () {
+
+    Future.wait([
+      // Restore JWT token from disk and validate via GET /me.
+      authService.initialize(),
+      // Minimum display time — keeps the brand moment consistent.
+      Future<void>.delayed(const Duration(milliseconds: 2200)),
+    ]).then((_) {
       if (!mounted) return;
-      // Skip onboarding if already seen — go straight to the app.
-      final destination = authFlowController.hasSeenOnboarding
-          ? Routes.root
-          : Routes.onboarding;
+
+      // Routing priority:
+      //   1. Valid saved session    → go straight to home (skip auth).
+      //   2. Onboarding not seen   → show onboarding slides.
+      //   3. Onboarding seen       → go to login / sign-up screen.
+      final String destination;
+      if (authService.isLoggedIn) {
+        destination = Routes.root;
+      } else if (authService.hasSeenOnboarding) {
+        destination = Routes.authChoice;
+      } else {
+        destination = Routes.onboarding;
+      }
+
       Navigator.of(context).pushReplacementNamed(destination);
     });
   }
