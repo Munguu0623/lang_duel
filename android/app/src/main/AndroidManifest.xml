@@ -1,8 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for all outgoing API calls -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!--
+      usesCleartextTraffic: allows plain HTTP to localhost / 10.0.2.2 during
+      development (wrangler dev on the host machine).
+      Set to false or remove before releasing to production — all prod traffic
+      must use HTTPS via the deployed Cloudflare Worker URL.
+    -->
     <application
         android:label="english_duel"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

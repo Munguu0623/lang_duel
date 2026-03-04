@@ -11,6 +11,10 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
+  # HTTP client for backend API calls
+  http: ^1.2.2
+  # Persistent key-value store — used for JWT token & onboarding flag
+  shared_preferences: ^2.3.1
 
 dev_dependencies:
   flutter_test:
