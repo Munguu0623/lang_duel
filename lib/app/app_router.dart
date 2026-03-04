@@ -12,6 +12,7 @@ import '../features/auth/screens/avatar_select_screen.dart';
 import '../features/auth/screens/level_select_screen.dart';
 import '../features/duel/duel_flow_screen.dart';
 
+
 /// Application router using Navigator 1.0 with custom transitions.
 abstract final class AppRouter {
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -75,6 +76,7 @@ abstract final class AppRouter {
           settings: settings,
           builder: (_) => const DuelFlowScreen(),
         );
+
     }
 
     // Fallback: go to root shell.

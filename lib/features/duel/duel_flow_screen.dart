@@ -9,7 +9,7 @@ import 'screens/searching_screen.dart';
 import 'screens/opponent_found_screen.dart';
 import 'screens/live_duel_screen.dart';
 import 'screens/scoring_screen.dart';
-import 'screens/result_screen.dart';
+import 'screens/unified_result_screen.dart';
 
 /// Fullscreen duel flow — bottom nav is hidden during the entire session.
 ///
@@ -41,7 +41,9 @@ class _DuelFlowScreenState extends State<DuelFlowScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        if (_controller.value.status == DuelStatus.idle) {
+        final status = _controller.value.status;
+        if (status == DuelStatus.idle || status == DuelStatus.result) {
+          // From mode-select or result → go Home
           Routes.backToHomeRoot(context);
         } else {
           _controller.reset();
@@ -62,6 +64,10 @@ class _DuelFlowScreenState extends State<DuelFlowScreen> {
   }
 
   Widget _buildScreen(DuelState state) {
+    final opponent = state.opponent;
+    final prompt = state.prompt;
+    final result = state.result;
+
     return switch (state.status) {
       DuelStatus.idle => ModeSelectScreen(
           key: const ValueKey('mode'),
@@ -76,29 +82,35 @@ class _DuelFlowScreenState extends State<DuelFlowScreen> {
             _controller.startCountdown();
           },
         ),
-      DuelStatus.found || DuelStatus.countdown => OpponentFoundScreen(
-          key: const ValueKey('found'),
-          opponent: state.opponent!,
-          onCountdownDone: () => _controller.startDuel(),
-        ),
-      DuelStatus.live => LiveDuelScreen(
-          key: const ValueKey('live'),
-          opponent: state.opponent!,
-          prompt: state.prompt!,
-          durationSeconds: state.durationSeconds,
-          onTimeUp: () => _controller.startScoring(),
-        ),
+      DuelStatus.found || DuelStatus.countdown => opponent == null
+          ? const SizedBox.shrink()
+          : OpponentFoundScreen(
+              key: const ValueKey('found'),
+              opponent: opponent,
+              onCountdownDone: () => _controller.startDuel(),
+            ),
+      DuelStatus.live => (opponent == null || prompt == null)
+          ? const SizedBox.shrink()
+          : LiveDuelScreen(
+              key: const ValueKey('live'),
+              opponent: opponent,
+              prompt: prompt,
+              durationSeconds: state.durationSeconds,
+              onTimeUp: () => _controller.startScoring(),
+            ),
       DuelStatus.scoring => ScoringScreen(
           key: const ValueKey('scoring'),
-          onDone: (result) => _controller.showResult(result),
+          onDone: (r) => _controller.showResult(r),
         ),
-      DuelStatus.result => ResultScreen(
-          key: const ValueKey('result'),
-          result: state.result!,
-          opponent: state.opponent!,
-          onRematch: () => _controller.startSearching(state.durationSeconds),
-          onHome: () => Routes.backToHomeRoot(context),
-        ),
+      DuelStatus.result => (result == null || opponent == null)
+          ? const SizedBox.shrink()
+          : UnifiedResultScreen(
+              key: const ValueKey('result'),
+              result: result,
+              opponent: opponent,
+              onHome: () => Routes.backToHomeRoot(context),
+              onRematch: () => _controller.reset(),
+            ),
     };
   }
 }
