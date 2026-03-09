@@ -19,6 +19,7 @@ class DuelState {
     this.status = DuelStatus.idle,
     this.opponent,
     this.prompt,
+    this.matchId,
     this.durationSeconds = 60,
     this.remainingSeconds = 60,
     this.transcript = const [],
@@ -28,6 +29,10 @@ class DuelState {
   final DuelStatus status;
   final DuelUser? opponent;
   final String? prompt;
+
+  /// [MatchedTicket.matchId] — transcribe болон result polling-д ашиглана.
+  final String? matchId;
+
   final int durationSeconds;
   final int remainingSeconds;
   final List<String> transcript;
@@ -37,6 +42,7 @@ class DuelState {
     DuelStatus? status,
     DuelUser? opponent,
     String? prompt,
+    String? matchId,
     int? durationSeconds,
     int? remainingSeconds,
     List<String>? transcript,
@@ -46,6 +52,7 @@ class DuelState {
       status: status ?? this.status,
       opponent: opponent ?? this.opponent,
       prompt: prompt ?? this.prompt,
+      matchId: matchId ?? this.matchId,
       durationSeconds: durationSeconds ?? this.durationSeconds,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
       transcript: transcript ?? this.transcript,

@@ -1,6 +1,216 @@
 import '../../../mock/fake_models.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DuelResultResponse — GET /duel/result/:matchId хариу
+//
+// Сервер гурван төлвийн аль нэгийг буцаана:
+//   waiting_submit   → хэрэглэгчийн submission ирэхгүй байна
+//   waiting_opponent → хэрэглэгч илгээсэн, өрсөлдөгчийг хүлээж байна
+//   done             → хоёул илгээсэн, оноо бодогдсон
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TranscribeResult — POST /duel/transcribe хариу
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// POST /duel/transcribe хариу — transcript + optional bot reply.
+///
+/// BOT match дугаарт [botReply] орно (GPT-4o-mini үүсгэсэн текст + үргэлжлэл).
+/// Human vs human дугаарт [botReply] null байна.
+class TranscribeResult {
+  const TranscribeResult({
+    required this.transcript,
+    this.botReply,
+  });
+
+  final String transcript;
+
+  /// BOT match-д орох GPT-4o-mini-ийн үүсгэсэн хариу.
+  final BotReply? botReply;
+}
+
+/// Bot-ын GPT-4o-mini хариу — текст + тооцоолсон үргэлжлэл.
+class BotReply {
+  const BotReply({required this.text, required this.durationMs});
+
+  final String text;
+
+  /// Текстийн урт дээр суурилсан тооцоолсон ярих хугацаа (миллисекунд).
+  final int durationMs;
+
+  factory BotReply.fromJson(Map<String, dynamic> json) => BotReply(
+        text: json['text'] as String,
+        durationMs: (json['durationMs'] as num).toInt(),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+/// Серверийн GET /duel/result/:matchId хариуг төлөв бүрт задалсан sealed class.
+sealed class DuelResultResponse {
+  const DuelResultResponse();
+
+  factory DuelResultResponse.fromJson(Map<String, dynamic> json) {
+    return switch (json['status'] as String) {
+      'waiting_submit' => const WaitingSubmitResult(),
+      'waiting_opponent' => const WaitingOpponentResult(),
+      'done' => DuelDoneResult.fromJson(json),
+      final s => throw FormatException('Тодорхойгүй result төлөв: $s'),
+    };
+  }
+}
+
+/// Хэрэглэгчийн аудио submission ирээгүй байна — хүлээнэ.
+class WaitingSubmitResult extends DuelResultResponse {
+  const WaitingSubmitResult();
+}
+
+/// Хэрэглэгч илгээсэн, өрсөлдөгчийг хүлээж байна.
+class WaitingOpponentResult extends DuelResultResponse {
+  const WaitingOpponentResult();
+}
+
+/// Оноо бодогдсон — эцсийн үр дүн.
+class DuelDoneResult extends DuelResultResponse {
+  const DuelDoneResult({
+    required this.matchId,
+    required this.winnerUserId,
+    required this.youUserId,
+    required this.youScores,
+    required this.opponentScores,
+    required this.rankDelta,
+  });
+
+  final String matchId;
+  final String? winnerUserId; // null → зургаан зурааны үед
+  final String youUserId;
+  final DuelScores youScores;
+  final DuelScores opponentScores;
+  final int rankDelta;
+
+  factory DuelDoneResult.fromJson(Map<String, dynamic> json) {
+    final you = json['you'] as Map<String, dynamic>;
+    final opp = json['opponent'] as Map<String, dynamic>;
+    return DuelDoneResult(
+      matchId: json['matchId'] as String,
+      winnerUserId: json['winnerUserId'] as String?,
+      youUserId: you['userId'] as String,
+      youScores: DuelScores.fromJson(you['scores'] as Map<String, dynamic>),
+      opponentScores:
+          DuelScores.fromJson(opp['scores'] as Map<String, dynamic>),
+      rankDelta: (json['rankDelta'] as num).toInt(),
+    );
+  }
+
+  /// UI-д хэрэглэх [DuelResult] болгон хөрвүүлнэ.
+  DuelResult toDuelResult() => DuelResult(
+        userScore: youScores.overall,
+        opponentScore: opponentScores.overall,
+        isWin: winnerUserId == youUserId,
+        userBreakdown: youScores.toScoreBreakdown(),
+        opponentBreakdown: opponentScores.toScoreBreakdown(),
+      );
+}
+
+/// Серверийн scores объект (fluency, grammar, pronunciation, confidence, overall).
+class DuelScores {
+  const DuelScores({
+    required this.fluency,
+    required this.grammar,
+    required this.pronunciation,
+    required this.confidence,
+    required this.overall,
+  });
+
+  final int fluency;
+  final int grammar;
+  final int pronunciation;
+  final int confidence; // vocabulary слот болгон ашиглана
+  final int overall;
+
+  factory DuelScores.fromJson(Map<String, dynamic> json) => DuelScores(
+        fluency: _toInt(json['fluency']),
+        grammar: _toInt(json['grammar']),
+        pronunciation: _toInt(json['pronunciation']),
+        confidence: _toInt(json['confidence']),
+        overall: _toInt(json['overall']),
+      );
+
+  /// [ScoreBreakdown] руу хөрвүүлнэ — confidence → vocabulary слот.
+  ScoreBreakdown toScoreBreakdown() => ScoreBreakdown(
+        pronunciation: pronunciation,
+        grammar: grammar,
+        fluency: fluency,
+        vocabulary: confidence,
+      );
+
+  static int _toInt(dynamic v) => v == null ? 0 : (v as num).toInt();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ChatMessageResult — POST /duel/chat хариу
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// POST /duel/chat хариу — transcript + seq + optional bot reply.
+class ChatMessageResult {
+  const ChatMessageResult({
+    required this.transcript,
+    required this.seq,
+    required this.durationMs,
+    this.botReply,
+  });
+
+  final String transcript;
+  final int seq;
+  final int durationMs;
+
+  /// BOT match-д орох GPT-4o-mini-ийн хариу (text + seq + durationMs).
+  final BotChatReply? botReply;
+}
+
+/// Bot-ын /duel/chat хариу — seq дагана (хэд хэдэн message-д тохируулах).
+class BotChatReply {
+  const BotChatReply({
+    required this.text,
+    required this.seq,
+    required this.durationMs,
+  });
+
+  final String text;
+  final int seq;
+  final int durationMs;
+
+  factory BotChatReply.fromJson(Map<String, dynamic> json) => BotChatReply(
+        text: json['text'] as String,
+        seq: (json['seq'] as num).toInt(),
+        durationMs: (json['durationMs'] as num).toInt(),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RemoteChatMessage — GET /duel/messages/:matchId хариуны нэг элемент
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Серверээс ирсэн нэг chat мессеж — polling-д ашиглана.
+class RemoteChatMessage {
+  const RemoteChatMessage({
+    required this.seq,
+    required this.userId,
+    required this.transcript,
+  });
+
+  final int seq;
+  final String userId;
+  final String transcript;
+
+  factory RemoteChatMessage.fromJson(Map<String, dynamic> json) =>
+      RemoteChatMessage(
+        seq: (json['seq'] as num).toInt(),
+        userId: json['userId'] as String,
+        transcript: json['transcript'] as String,
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Sealed TicketResult
 //
 // matchmaking.ts дахь серверийн TicketState union-тай тохирно:
@@ -24,7 +234,7 @@ sealed class TicketResult {
     return switch (json['status'] as String) {
       'waiting' => WaitingTicket(
           ticketId: json['ticketId'] as String,
-          etaSec: (json['etaSec'] as num).toInt(),
+          etaSec: (json['etaSec'] as num?)?.toInt() ?? 10,
         ),
       'matched' => MatchedTicket(
           ticketId: json['ticketId'] as String,

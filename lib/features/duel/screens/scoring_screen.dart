@@ -2,17 +2,37 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/network/api_client.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../features/auth/auth_service.dart';
 import '../../../mock/fake_data.dart';
 import '../../../mock/fake_models.dart';
 import '../../../ui/widgets/skeleton.dart';
 import '../../../ui/widgets/top_bar.dart';
+import '../data/duel_models.dart';
+import '../data/duel_repository.dart';
 
+/// "AI is judging..." дэлгэц — GET /duel/result/:matchId-г 2 секунд тутамд poll хийнэ.
+///
+/// Урсгал:
+///   waiting_submit   → submission ирэхгүй хүлээнэ
+///   waiting_opponent → өрсөлдөгчийг хүлээнэ
+///   done             → [onDone]-г дуудна
+///
+/// Fallback: [_kMaxPollSec] секундын дотор done ирэхгүй бол FakeData ашиглана.
 class ScoringScreen extends StatefulWidget {
   const ScoringScreen({
     super.key,
+    required this.matchId,
+    required this.currentUserId,
     required this.onDone,
   });
+
+  final String matchId;
+
+  /// Ялагчийг тодорхойлоход ашиглах — [DuelDoneResult.winnerUserId]-тай харьцуулна.
+  final String currentUserId;
 
   final ValueChanged<DuelResult> onDone;
 
@@ -23,7 +43,13 @@ class ScoringScreen extends StatefulWidget {
 class _ScoringScreenState extends State<ScoringScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _dotController;
-  Timer? _timer;
+  Timer? _pollTimer;
+
+  /// Poll дуусгах хамгийн их хугацаа (секунд).
+  static const _kMaxPollSec = 60;
+  int _elapsedSec = 0;
+
+  late final DuelRepository _repo;
 
   @override
   void initState() {
@@ -33,22 +59,65 @@ class _ScoringScreenState extends State<ScoringScreen>
       duration: const Duration(milliseconds: 1200),
     )..repeat();
 
-    _timer = Timer(const Duration(seconds: 2), () {
-      widget.onDone(FakeData.generateFakeResult());
+    // matchId хоосон байвал (ер бусын тохиолдол) шууд fallback.
+    if (widget.matchId.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _stopAndFallback());
+      return;
+    }
+
+    _repo = DuelRepository(ApiClient(bearerToken: authService.token));
+
+    // Шууд нэг poll хийгээд 2 секунд тутамд үргэлжлүүлнэ.
+    _poll();
+    _pollTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      _elapsedSec += 2;
+      if (_elapsedSec >= _kMaxPollSec) {
+        _stopAndFallback();
+      } else {
+        _poll();
+      }
     });
+  }
+
+  Future<void> _poll() async {
+    if (!mounted) return;
+    try {
+      final result = await _repo.pollResult(widget.matchId);
+      if (!mounted) return;
+
+      switch (result) {
+        case DuelDoneResult():
+          _pollTimer?.cancel();
+          widget.onDone(result.toDuelResult());
+
+        case WaitingSubmitResult():
+        case WaitingOpponentResult():
+          // Хүлээсэн хэвээр — poll үргэлжилнэ.
+          break;
+      }
+    } on ApiException {
+      // Сүлжээний/серверийн алдаа — дараагийн poll хүртэл хүлээнэ.
+    } catch (_) {
+      // Тодорхойгүй алдаа — дараагийн poll хүртэл хүлээнэ.
+    }
+  }
+
+  void _stopAndFallback() {
+    _pollTimer?.cancel();
+    if (!mounted) return;
+    widget.onDone(FakeData.generateFakeResult());
   }
 
   @override
   void dispose() {
     _dotController.dispose();
-    _timer?.cancel();
+    _pollTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    // Dot colors: primary, accent, accentCyan
     final dotColors = [c.primary, c.accent, c.accentCyan];
 
     return SafeArea(
@@ -56,7 +125,7 @@ class _ScoringScreenState extends State<ScoringScreen>
         children: [
           const TopBar(title: 'Scoring'),
           const Spacer(),
-          // Icon — gradient circle + glow
+          // Icon
           Container(
             width: 80,
             height: 80,
@@ -120,8 +189,7 @@ class _ScoringScreenState extends State<ScoringScreen>
           ),
           const SizedBox(height: SpacingTokens.xl),
           const Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: SpacingTokens.base),
+            padding: EdgeInsets.symmetric(horizontal: SpacingTokens.base),
             child: SkeletonCard(),
           ),
           const Spacer(),

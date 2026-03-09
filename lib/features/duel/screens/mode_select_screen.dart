@@ -36,7 +36,7 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: '60 seconds. AI judges. Fast-paced.',
               duration: '1:00',
               enabled: true,
-              onTap: () => onModeSelected(10), // 10s for demo
+              onTap: () => onModeSelected(60),
             ),
             const SizedBox(height: 0),
             // Entry Duel — disabled

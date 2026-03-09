@@ -16,15 +16,21 @@ class DuelController extends ValueNotifier<DuelState> {
     );
   }
 
-  /// Серверийн жинхэнэ [prompt]-тай [DuelStatus.found] руу шилжинэ.
+  /// Серверийн жинхэнэ [prompt] болон [matchId]-тай [DuelStatus.found] руу шилжинэ.
   ///
   /// [opponent] — дуудагч тал [DuelOpponent.toDuelUser()]-ээр хөрвүүлсэн байна.
   /// [prompt]   — [MatchedTicket.prompt]-аас шууд ирнэ; хуурамч өгөгдөл байхгүй.
-  void opponentFound(DuelUser opponent, {required String prompt}) {
+  /// [matchId]  — [MatchedTicket.matchId] — transcribe + result polling-д хадгалагдана.
+  void opponentFound(
+    DuelUser opponent, {
+    required String prompt,
+    required String matchId,
+  }) {
     value = value.copyWith(
       status: DuelStatus.found,
       opponent: opponent,
       prompt: prompt,
+      matchId: matchId,
     );
   }
 

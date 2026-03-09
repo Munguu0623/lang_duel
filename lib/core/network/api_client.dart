@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import 'api_exception.dart';
 
@@ -19,11 +20,14 @@ import 'api_exception.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 const String _kBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'http://127.0.0.1:8787',
+  defaultValue: 'http://127.0.0.1:8788',
 );
 
-/// Бүх хүсэлтэд хэрэглэгдэх timeout хугацаа.
+/// JSON хүсэлтийн timeout (GET/POST).
 const _kTimeout = Duration(seconds: 20);
+
+/// Multipart upload timeout — Whisper (25s) + GPT reply (15s) = 40s max.
+const _kUploadTimeout = Duration(seconds: 60);
 
 /// [package:http]-г ороосон нимгэн HTTP client.
 ///
@@ -55,6 +59,55 @@ class ApiClient {
   ) =>
       _send('POST', path, body);
 
+  /// Multipart form-data хүсэлт — аудио байт upload хийхэд ашиглана.
+  ///
+  /// [fields]    — нэмэлт текст талбарууд (matchId гэх мэт).
+  /// [fileField] — файлын form field нэр (бэкэнд `audio` гэж хүлээнэ).
+  /// [fileBytes] — аудио файлын raw байт (файл уншсан байна).
+  /// [filename]  — сервер рүү илгээх файлын нэр.
+  /// [mimeType]  — MIME төрөл: `audio/m4a` native, `audio/webm` web.
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required Map<String, String> fields,
+    required String fileField,
+    required Uint8List fileBytes,
+    String filename = 'audio.m4a',
+    String mimeType = 'audio/m4a',
+  }) async {
+    final uri = Uri.parse('$_kBaseUrl$path');
+    final request = http.MultipartRequest('POST', uri);
+
+    if (bearerToken != null) {
+      request.headers['Authorization'] = 'Bearer $bearerToken';
+    }
+    request.fields.addAll(fields);
+    request.files.add(http.MultipartFile.fromBytes(
+      fileField,
+      fileBytes,
+      filename: filename,
+      contentType: MediaType.parse(mimeType),
+    ));
+
+    late http.Response response;
+    try {
+      final streamed = await request.send().timeout(_kUploadTimeout);
+      response = await http.Response.fromStream(streamed);
+    } on TimeoutException {
+      throw const ApiException(
+        statusCode: 0,
+        serverCode: 'TIMEOUT',
+        message: 'Хүсэлт хэтэрхий удаан байна. Холболтоо шалгана уу.',
+      );
+    } on http.ClientException {
+      throw const ApiException(
+        statusCode: 0,
+        serverCode: 'NO_CONNECTION',
+        message: 'Серверт холбогдож чадсангүй. Интернэт холболтоо шалгана уу.',
+      );
+    }
+    return _decode(response);
+  }
+
   // ── Дотоод ────────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> _send(
@@ -84,12 +137,6 @@ class ApiClient {
         statusCode: 0,
         serverCode: 'TIMEOUT',
         message: 'Хүсэлт хэтэрхий удаан байна. Холболтоо шалгана уу.',
-      );
-    } on SocketException {
-      throw const ApiException(
-        statusCode: 0,
-        serverCode: 'NO_CONNECTION',
-        message: 'Серверт холбогдож чадсангүй. Интернэт холболтоо шалгана уу.',
       );
     } on http.ClientException {
       throw const ApiException(

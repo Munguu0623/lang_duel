@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/tokens.dart';
 import '../../app/routes.dart';
 import '../../features/auth/auth_flow_controller.dart';
+import '../../features/auth/auth_service.dart';
 import 'data/duel_models.dart';
 import 'duel_flow_controller.dart';
 import 'duel_state.dart';
@@ -88,6 +89,7 @@ class _DuelFlowScreenState extends State<DuelFlowScreen> {
             _controller.opponentFound(
               match.opponent.toDuelUser(),
               prompt: match.prompt,
+              matchId: match.matchId,
             );
             _controller.startCountdown();
           },
@@ -99,17 +101,21 @@ class _DuelFlowScreenState extends State<DuelFlowScreen> {
               opponent: opponent,
               onCountdownDone: () => _controller.startDuel(),
             ),
-      DuelStatus.live => (opponent == null || prompt == null)
+      DuelStatus.live => (opponent == null || prompt == null || state.matchId == null)
           ? const SizedBox.shrink()
           : LiveDuelScreen(
               key: const ValueKey('live'),
               opponent: opponent,
               prompt: prompt,
+              matchId: state.matchId!,
+              currentUserId: authService.currentUser?.id ?? '',
               durationSeconds: state.durationSeconds,
               onTimeUp: () => _controller.startScoring(),
             ),
       DuelStatus.scoring => ScoringScreen(
           key: const ValueKey('scoring'),
+          matchId: state.matchId ?? '',
+          currentUserId: authService.currentUser?.id ?? '',
           onDone: (r) => _controller.showResult(r),
         ),
       DuelStatus.result => (result == null || opponent == null)
