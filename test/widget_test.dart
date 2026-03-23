@@ -1,11 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:english_duel/app/app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:voice_duel/main.dart';
 
 void main() {
   testWidgets('App renders', (WidgetTester tester) async {
-    await tester.pumpWidget(const EnglishDuelApp());
-    // Demo screen is temporarily the first tab.
-    expect(find.text('Component Kit'), findsOneWidget);
+    await tester.pumpWidget(
+      const ProviderScope(child: VoiceDuelApp()),
+    );
+    expect(find.byType(VoiceDuelApp), findsOneWidget);
   });
 }

@@ -1,113 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:voice_duel/core/theme/app_theme.dart';
+import 'package:voice_duel/core/models/models.dart';
+import 'package:voice_duel/core/providers/app_providers.dart';
+import 'package:voice_duel/core/widgets/shared_widgets.dart';
 
-import '../../core/theme/tokens.dart';
-import '../../mock/fake_data.dart';
-import '../../mock/fake_models.dart';
-import '../../ui/widgets/soft_chip.dart';
-import 'widgets/leaderboard_tile.dart';
-import 'widgets/top_three_header.dart';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🏆 Leaderboard Screen — top 3 podium + ranked list
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-/// Leaderboard tab — Global/Weekly toggle, top-3 podium, ranked list.
-///
-/// Performance: SliverList.builder for the ranking list, split widgets.
-class LeaderboardScreen extends StatefulWidget {
+class LeaderboardScreen extends ConsumerWidget {
   const LeaderboardScreen({super.key});
 
   @override
-  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final players = ref.watch(leaderboardProvider);
+    final top3 = players.take(3).toList();
+    final rest = players.skip(3).toList();
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
-  int _selectedTab = 0;
-  final _tabs = const ['Global', 'Weekly'];
+    return Scaffold(
+      body: Column(
+        children: [
+          // ── Header ──
+          Container(
+            decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 12,
+              bottom: 16,
+            ),
+            width: double.infinity,
+            child: Text(
+              '🏆 Leaderboard',
+              style: AppText.displayMd.copyWith(color: AppColors.white),
+              textAlign: TextAlign.center,
+            ),
+          ),
 
-  @override
-  Widget build(BuildContext context) {
-    final entries = FakeData.leaderboard;
-    final top3 = entries.take(3).toList();
-    final rest = entries.skip(3).toList();
+          // ── Top 3 Podium ──
+          _Podium(top3: top3),
 
-    // Find current user's rank for the highlight card.
-    final myEntry = entries.firstWhere(
-      (e) => e.user.id == FakeData.currentUser.id,
-      orElse: () => entries.last,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.base),
-      child: CustomScrollView(
-        slivers: [
-          // ─── Title with arena letterSpacing ──
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: SpacingTokens.base),
-              child: Text(
-                'Leaderboard',
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      letterSpacing: -0.8,
-                    ),
+          // ── Rest of the list ──
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+              itemCount: rest.length,
+              itemBuilder: (_, i) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: _RankTile(entry: rest[i]),
               ),
             ),
-          ),
-
-          // ─── Toggle chips ──────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: SpacingTokens.base),
-              child: Row(
-                children: [
-                  for (var i = 0; i < _tabs.length; i++) ...[
-                    if (i > 0) const SizedBox(width: SpacingTokens.sm),
-                    SoftChip(
-                      label: _tabs[i],
-                      selected: _selectedTab == i,
-                      onTap: () => setState(() => _selectedTab = i),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-
-          // ─── Current user rank card with glow ──
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: SpacingTokens.lg),
-              child: _MyRankCard(entry: myEntry),
-            ),
-          ),
-
-          // ─── Top 3 podium ──────────────────
-          if (top3.length == 3)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(top: SpacingTokens.xl),
-                child: TopThreeHeader(entries: top3),
-              ),
-            ),
-
-          // ─── Rankings header ────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: SpacingTokens.xl,
-                bottom: SpacingTokens.sm,
-              ),
-              child: Text('Rankings',
-                  style: Theme.of(context).textTheme.titleLarge),
-            ),
-          ),
-
-          // ─── Ranked list ───────────────────
-          SliverList.builder(
-            itemCount: rest.length,
-            itemBuilder: (context, index) {
-              return LeaderboardTile(entry: rest[index]);
-            },
-          ),
-
-          const SliverToBoxAdapter(
-            child: SizedBox(height: SpacingTokens.base),
           ),
         ],
       ),
@@ -115,85 +59,181 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 }
 
-/// Highlighted card showing the current user's rank at the top.
-class _MyRankCard extends StatelessWidget {
-  const _MyRankCard({required this.entry});
+// ── Podium (top 3) ───────────────────────────────────
+class _Podium extends StatelessWidget {
+  const _Podium({required this.top3});
+  final List<LeaderboardEntry> top3;
 
-  final LeaderboardEntry entry;
+  static const _rankColors = {
+    1: AppColors.gold,
+    2: AppColors.silver,
+    3: AppColors.bronze,
+  };
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
-    return Stack(
-      children: [
-        // Subtle radial glow behind card
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 1.2,
-                colors: [
-                  c.primary.withValues(alpha: 0.06),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.all(SpacingTokens.base),
-          decoration: BoxDecoration(
-            color: c.primaryLight,
-            borderRadius: RadiusTokens.card,
-          ),
-          child: Row(
-            children: [
-              // Gradient circle rank badge
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: c.primary,
+    if (top3.length < 3) return const SizedBox.shrink();
+
+    // Display order: 2nd, 1st, 3rd
+    final ordered = [top3[1], top3[0], top3[2]];
+    final heights = [90.0, 110.0, 75.0];
+    final sizes = [48.0, 56.0, 44.0];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.lg,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: List.generate(3, (i) {
+          final entry = ordered[i];
+          final color = _rankColors[entry.rank] ?? AppColors.darkSoft;
+
+          return Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppAvatar(
+                  size: sizes[i],
+                  emoji: entry.emoji,
+                  color: color,
                 ),
-                child: Center(
+                const SizedBox(height: 6),
+                Text(
+                  entry.displayName,
+                  style: AppText.headingSm.copyWith(fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  '${entry.score}',
+                  style: AppText.bodySm.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: heights[i],
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [color, color.withOpacity(0.6)],
+                    ),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                  ),
+                  alignment: Alignment.center,
                   child: Text(
                     '#${entry.rank}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    style: AppText.displaySm.copyWith(
+                      color: AppColors.white,
+                      fontSize: 22,
                     ),
                   ),
                 ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// ── Rank Tile (4th and below) ────────────────────────
+class _RankTile extends StatelessWidget {
+  const _RankTile({required this.entry});
+  final LeaderboardEntry entry;
+
+  Color get _tierColor => switch (entry.tier) {
+    TierLevel.gold    => AppColors.gold,
+    TierLevel.silver  => AppColors.silver,
+    TierLevel.bronze  => AppColors.bronze,
+    TierLevel.diamond => AppColors.info,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: entry.isCurrentUser
+            ? AppColors.primary.withOpacity(0.08)
+            : AppColors.white,
+        border: entry.isCurrentUser
+            ? Border.all(color: AppColors.primary, width: 2)
+            : null,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Row(
+        children: [
+          // Rank number
+          SizedBox(
+            width: 28,
+            child: Text(
+              '${entry.rank}',
+              style: AppText.displaySm.copyWith(
+                color: AppColors.darkSoft,
+                fontSize: 16,
               ),
-              const SizedBox(width: SpacingTokens.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+
+          // Avatar
+          AppAvatar(
+            size: 34,
+            emoji: entry.emoji,
+            color: entry.isCurrentUser ? AppColors.primary : AppColors.darkSoft,
+            borderWidth: 2,
+          ),
+          const SizedBox(width: AppSpacing.md),
+
+          // Name + tier
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text('Your rank',
-                        style: Theme.of(context).textTheme.bodyMedium),
                     Text(
-                      entry.user.name,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      entry.displayName,
+                      style: AppText.headingSm.copyWith(fontSize: 13),
                     ),
+                    if (entry.isCurrentUser)
+                      Text(
+                        ' (Би)',
+                        style: AppText.bodySm.copyWith(
+                          color: AppColors.primary,
+                          fontSize: 10,
+                        ),
+                      ),
                   ],
                 ),
-              ),
-              Text(
-                '${(entry.user.winRate * 100).round()}% WR',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: c.primary,
+                AppBadge(
+                  text: entry.tier.label,
+                  color: _tierColor.withOpacity(0.15),
+                  textColor: _tierColor,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+
+          // Score
+          Text(
+            '${entry.score}',
+            style: AppText.displaySm.copyWith(
+              color: AppColors.primary,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
