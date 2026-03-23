@@ -52,6 +52,19 @@ abstract final class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  static const bgGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [lightBg, Color(0xFFE8E4F8)],
+  );
+
+  // ── Parrot mascot colors ──
+  static const parrotGreen = Color(0xFF27AE60);
+  static const parrotGreenLight = Color(0xFF2ECC71);
+  static const parrotBlue = Color(0xFF2980B9);
+  static const parrotYellow = Color(0xFFF1C40F);
+  static const parrotOrange = Color(0xFFE67E22);
 }
 
 /// Consistent spacing scale (multiples of 4).
@@ -74,6 +87,8 @@ abstract final class AppRadius {
   static const double lg = 20;
   static const double xl = 24;
   static const double pill = 100;
+  static const double input = 14;
+  static const double button = 14;
 }
 
 /// App-wide text styles built on Nunito + Lilita One.
@@ -140,6 +155,25 @@ abstract final class AppText {
     fontWeight: FontWeight.w700,
     color: AppColors.darkSoft,
     letterSpacing: 0.5,
+  );
+
+  // ── Error / Link / Brand ──
+  static TextStyle error = GoogleFonts.nunito(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: AppColors.danger,
+  );
+
+  static TextStyle link = GoogleFonts.nunito(
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primary,
+  );
+
+  static TextStyle brand = GoogleFonts.lilitaOne(
+    fontSize: 22,
+    letterSpacing: 3,
+    color: AppColors.primary,
   );
 }
 

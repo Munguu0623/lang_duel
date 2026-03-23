@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:voice_duel/features/splash/splash_screen.dart';
 import 'package:voice_duel/features/auth/login_screen.dart';
+import 'package:voice_duel/features/auth/screens/register_screen.dart';
+import 'package:voice_duel/features/auth/screens/forgot_password_screen.dart';
 import 'package:voice_duel/features/home/home_screen.dart';
 import 'package:voice_duel/features/duel/matchmaking_screen.dart';
 import 'package:voice_duel/features/duel/duel_screen.dart';
@@ -18,6 +19,8 @@ import 'package:voice_duel/features/shell/app_shell.dart';
 abstract final class AppRoutes {
   static const splash = '/';
   static const login = '/login';
+  static const register = '/register';
+  static const forgotPassword = '/forgot-password';
   static const home = '/home';
   static const matchmaking = '/matchmaking';
   static const duel = '/duel';
@@ -37,7 +40,24 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.login,
-      builder: (_, __) => const LoginScreen(),
+      builder: (context, __) => LoginScreen(
+        onRegister: () => context.go(AppRoutes.register),
+        onForgotPassword: () => context.go(AppRoutes.forgotPassword),
+        onLoginSuccess: () => context.go(AppRoutes.home),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.register,
+      builder: (context, __) => RegisterScreen(
+        onLogin: () => context.go(AppRoutes.login),
+        onRegisterSuccess: () => context.go(AppRoutes.home),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.forgotPassword,
+      builder: (context, __) => ForgotPasswordScreen(
+        onBack: () => context.go(AppRoutes.login),
+      ),
     ),
     GoRoute(
       path: AppRoutes.matchmaking,

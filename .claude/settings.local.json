@@ -6,7 +6,8 @@
       "Bash(flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tail -15)",
       "Bash(flutter analyze lib/features/auth/screens/splash_screen.dart 2>&1)",
       "Bash(flutter analyze 2>&1 | head -60)",
-      "Bash(flutter analyze 2>&1)"
+      "Bash(flutter analyze 2>&1)",
+      "Bash(flutter analyze:*)"
     ]
   }
 }
