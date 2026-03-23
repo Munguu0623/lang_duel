@@ -123,6 +123,10 @@ final topicsProvider = Provider<List<DuelTopic>>((_) => [
 // ── Selected Topic ───────────────────────────────────
 final selectedTopicProvider = StateProvider<DuelTopic?>((ref) => null);
 
+// ── Game Progress (A1 level map) ─────────────────────
+final currentStageProvider = StateProvider<int>((_) => 1);
+final stageStarsProvider = StateProvider<Map<int, int>>((_) => const {});
+
 // ── Leaderboard ──────────────────────────────────────
 final leaderboardProvider = Provider<List<LeaderboardEntry>>((_) => [
   const LeaderboardEntry(rank: 1, displayName: 'Bat_Bold', emoji: '🦅', score: 2850, tier: TierLevel.gold),

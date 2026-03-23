@@ -29,6 +29,9 @@ abstract final class AppColors {
   static const lightBg = Color(0xFFF8F9FD);
   static const white = Color(0xFFFFFFFF);
 
+  // ── Extra ──
+  static const cyan = Color(0xFF00CEC9);
+
   // ── Tier / Rank ──
   static const gold = Color(0xFFF9CA24);
   static const silver = Color(0xFF95A5A6);
